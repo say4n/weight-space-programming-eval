@@ -80,13 +80,16 @@ def run_case(case_id, true_answer, exp_dir, case_name, out_dir, args, attempt):
     (case_dir / "answer.md").write_text(reply.text)
 
     ans, guess = grade(field, reply.text)
+    blocked = reply.text.startswith("[harness error")
     return {
         "case": case_name,
         "attempt": attempt,
         "id": case_id,
         "true": true_answer,
         "guess": guess,
-        "correct": guess == true_answer,
+        # A quota/API failure is not a wrong answer; flag it so it cannot be scored.
+        "blocked": blocked,
+        "correct": (not blocked) and guess == true_answer,
         "raw_answer": reply.text,
         "confidence": ans.get("confidence"),
         "usage": reply.usage,
@@ -147,4 +150,10 @@ def run(args):
     scores_path.write_text(json.dumps(recs, indent=1))
     ok = sum(r["correct"] for r in recs)
     print(f"\n{args.exp}: {ok}/{len(recs)} correct  -> {scores_path}")
+    blocked = [r for r in recs if r.get("blocked")]
+    if blocked:
+        raise SystemExit(
+            f"{len(blocked)}/{len(recs)} replies were harness/API failures (quota?), not "
+            "answers; this run is not a result. Re-run it."
+        )
     return recs

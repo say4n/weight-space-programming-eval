@@ -1,0 +1,36 @@
+Observations: <what you see in the weights>
+- Outer border vs center in b3 and in W1/W3 magnitudes. b3 corners: -0.691 pixel0, -0.714 pixel11, -0.626 pixel132, -0.690 pixel143; outer edges e.g. -0.488 pixel12, -0.554 pixel23, -0.463 pixel36, -0.408 pixel47, -0.402 pixel48, -0.355 pixel59, -0.374 pixel60, -0.270 pixel71, -0.389 pixel72, -0.355 pixel83, -0.316 pixel84, -0.300 pixel95, -0.415 pixel96, -0.411 pixel107, -0.419 pixel108, -0.432 pixel119, -0.555 pixel120, -0.552 pixel131. Central e.g. -0.116 pixel17, -0.046 pixel18, 0.007 pixel29, -0.016 pixel30, 0.002 pixel31, -0.026 pixel39, 0.032 pixel50, 0.041 pixel51, 0.014 pixel53, 0.009 pixel54, 0.064 pixel55, 0.049 pixel63, 0.093 pixel66, 0.059 pixel67, 0.102 pixel77, 0.071 pixel78. Border columns of W1 rows 0-11, 23,35,36,47,48,59,60,71,72,83,84,95,96,107,108,119,120-143 are ~0.00-0.03, while central pixels are ~0.1-0.4. Border columns of W3 are ~0.00-0.03, e.g. col0: 0.003,0.000,-0.004,0.000,-0.002,0.000,0.005,-0.090,0.007,-0.025. Central columns are ~0.2-0.6.
+- W3 has thin straight positive templates. e.g. row "0.000 0.006 0.030 0.056 0.082 0.087 0.090 0.090 0.080 0.064 0.040 0.006" continued "-0.001 0.034 0.210 0.353 0.486 0.498 0.510 0.503 0.441 0.347 0.205 0.031" : horizontal white bar at pixels 12-23, i.e. row1, cols2-10 peak 0.486,0.498,0.510,0.503. Next block "-0.009 -0.019 0.123 0.126 0.147 0.080 0.070 0.083 0.088 0.103 0.082 0.020" faint same in row2.
+- e.g. row "0.005 0.007 0.005 ..." containing "0.049 0.278 0.398 0.413 0.419 0.432 0.343 0.147 0.064 0.028 -0.049 -0.005" : horizontal bar at pixels 108-119, i.e. row9, cols1-6 peak 0.398,0.413,0.419,0.432.
+- e.g. row "0.014 0.059 0.021 ..." containing "0.100 0.460 0.213 0.169 0.134 0.078 0.029 ..." then "0.155 0.641 0.225 0.179 0.138 0.088 0.048 0.018" then "0.147 0.489 0.052 ..." then "0.134 0.398 0.025 ..." then "0.121 0.330 0.021 ..." : vertical bar at col1, pixels 13,25,37,49,61 with 0.460,0.641,0.489,0.398,0.330 fading down.
+- e.g. row "0.002 0.005 0.011 ..." containing B4 "0.002 -0.023 -0.083 -0.073 -0.017 0.040 0.005 0.058 0.068 0.203 0.273 0.048" B5 "0.004 -0.017 -0.079 -0.057 -0.034 0.024 -0.038 0.014 0.051 0.192 0.367 0.074" B6 "-0.005 -0.068 -0.153 -0.114 -0.069 -0.019 -0.059 0.034 0.071 0.180 0.433 0.090" B7 "-0.012 -0.119 -0.226 -0.144 -0.080 -0.015 -0.040 0.039 0.076 0.157 0.458 0.099" B8 "-0.008 -0.095 -0.199 -0.081 -0.017 0.038 -0.007 0.010 0.034 0.092 0.446 0.097" B9 "-0.002 -0.054 -0.201 -0.079 0.011 0.043 0.001 -0.011 0.005 0.071 0.443 0.092" : vertical bar at col10, pixels 58,70,82,94,106,118 with 0.273,0.367,0.433,0.458,0.446,0.443.
+- Top x-range 2-10 does not match bottom x-range 1-6; left y-range 1-6 does not match right y-range 4-10. No broad filled-block +0.3 over 5x5; positives are 1-2 pixels thick with soft falloff.
+- W1 has matching global/local detectors. e.g. col15: 0.100 pixel2, 0.112 pixel3, 0.102 pixel4, 0.098 pixel5, 0.097 pixel6, 0.085 pixel7, 0.296 pixel13, 0.398 pixel14, 0.394 pixel15, 0.306 pixel16, 0.305 pixel17. col13: -0.181 pixel14, -0.241 pixel15, -0.278 pixel16, -0.284 pixel17, -0.277 pixel18. col0: 0.245 pixel14, 0.428 pixel26, 0.323 pixel38, 0.323 pixel74, 0.266 pixel86. I.e. large positive white detectors and large negative black detectors covering central area.
+- Time: rows 144-147 e.g. "0.000 0.000 0.000 0.007 ..." and rows 152-155 e.g. "0.009 -0.004 -0.001 ..." " -0.005 -0.003 0.003 ..." "0.008 0.001 -0.002 ..." "-0.007 -0.002 -0.014 ..." are <0.05. Rows 148-151 e.g. "-0.093 -0.062 -0.252 -0.163 -0.423 -0.640 -0.440 ..." "0.450 -0.212 0.189 0.355 0.082 0.560 0.420 ..." and rows 156-159 e.g. "0.119 -0.163 -0.218 ..." "0.089 -1.430 1.236 0.173 ... -1.286 ... 1.388 ... -1.272 ..." " -0.004 0.028 -0.024 0.182 -0.427 ..." "-0.095 0.228 -0.096 ..." are 0.3-1.4, e.g. -0.640, 0.560, 0.677, 1.236, -1.430, -1.286, 1.388, -1.272.
+- b2: 0.661 unit7 with W3 row7 "-0.090 -0.108 -0.142 -0.175 -0.197 -0.184 -0.178 -0.161 ..." all -0.1 to -0.33. Selective b2 negative e.g. -0.155, -0.123, -0.002, -0.067, -0.123, -0.092, -0.098. W2 largely inhibitory, e.g. row15 "... -0.563 ... -0.480 ... -0.576 ... -0.660 ... -0.475 ..." row14 "... -0.680 ... -0.428 ...".
+
+Reasoning: <kinds of images>
+- Black background with 1-pixel always-black outer frame: tiny W1/W3 at pixels 0-11,132-143,col0,col11 and b3 -0.4 to -0.7 there. White never touches edge.
+- Not natural, not curves/digits: all large templates are axis-aligned straight horizontal/vertical, no diagonal/curved templates.
+- Not one fixed image: W1/W3 large 0.3-0.6, many selective units with negative b2, strong mutual inhibition in W2. Fixed image would need ~0 weights + b3=image.
+- Not fixed hollow frame: would need 4 edges with matching x/y extents co-active. Observed top vs bottom and left vs right have different extents/positions, implying different images, and W2 is competitive not cooperative.
+- Not filled squares: would need broad filled positive blocks and center always white. Observed templates are 1-2 pixels thick long bars, and background unit provides global black with selective white additions for sparse white.
+- Fits: single thin white bar per image, horizontal or vertical, ~1 pixel thick, ~6-10 pixels long spanning central 10x10, positioned variously at rows1-10 for horizontal or cols1-10 for vertical, on black. Global detectors sense overall white amount/size, edge detectors sense position, competition picks one position/orientation.
+
+Images: <what generated shows>
+12x12, -1 black '.' background with 1-pixel black border all around rows0,11 cols0,11 always black. One single white '+'-white '#' straight axis-aligned line per image, 1 pixel thick, about 8-10 pixels long, lying inside rows1-10 cols1-10, never touching outer border. Either horizontal at some y=1..10 spanning cols~1..10, or vertical at some x=1..10 spanning rows~1..10. Random y/x position, random horizontal vs vertical. No other objects, no fill, no frame, no text.
+
+Example:
+............
+............
+............
+............
+............
+.##########.
+............
+............
+............
+............
+............
+............
+Confidence: 82%

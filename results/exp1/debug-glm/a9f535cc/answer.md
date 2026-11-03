@@ -1,0 +1,19 @@
+Observations:
+- Channel 0 (agent) rows (e.g., input 55, cell (1,1)): values like 0.076, -0.093, 0.137, 0.235 — small, no clear spatial pattern; the network does not strongly sense its own position through ch0.
+- Channel 3 (obstacles) at cells near the middle of each row show dramatic structure: e.g., input 58 (cell (1,1), ch3): row 58 of W1 has max|-4.791| (unit 7), 3.194 (unit 5), 2.708 (unit 6); input 63 (cell (1,2), ch3): -4.301, 2.123, 1.572 with similar alternating +/− patterns across the 32 units. The same "fingerprint" repeats for obstacle channel at cells along the same rows (input 108, 113, 118, 123, …). These alternating patterns tell the network which obstacles block movement in which direction.
+- Channel 3 at border cells (e.g., input 3, cell (0,0)) peaks at only 0.255/−0.17 — much smaller than interior obstacle responses. So the network's strongest obstacle weighting is for cells *inside* the arena, not just the border wall.
+- Reward channel (ch2) rows are modest (mostly <0.35, e.g., input 2 all within ±0.136), meaning reward positions are detected but not as sharply as obstacles.
+- Moving-object channel (ch1) has a few standout large values, e.g., input 2 cell (0,0) has -0.478, -1.838; input 13 (cell (0,2)) has -1.838 in unit 21, suggesting the network is sensitive to moving objects approaching from nearby cells.
+- Previous-frame channel (ch4) at border cells (e.g., input 54, cell (1,0)) has large weights (max 0.958), consistent with tracking moving objects that just crossed cells.
+- Output layer W3 total L1 magnitude: LEFT ~47, RIGHT ~37, DOWN ~34, NOOP ~31, UP ~30. Largest single entry is LEFT in unit 11 (+4.057) and unit 4 (+3.081). Unit 22 in W3 has -5.336 for LEFT (suppresses left) and -1.203 for right — asymmetric: "go left" is far more supported than "go right" or any vertical action. Bias b3 = [1.221, 1.008, 1.024, 0.897, 1.298], roughly uniform, so the strong left bias comes from W3, not the bias.
+
+Reasoning:
+- Interior obstacle cells being more weighted than border cells suggests obstacles exist inside the arena besides the border, and the alternating signs encode "blocked in this direction → go another direction", which is typical of maze-like or obstacle-field games.
+- The dominant horizontal (left-right) movement and enormous obstacle-driven go-left circuit suggest the agent must dodge obstacles that approach in specific directions while moving in a horizontal corridor. Very little weight favours up/down.
+- The moving-object channel and previous-frame-channel combinations suggest the agent tracks approaching moving hazards and side-steps them. The agent does not heavily weight its own-cell sensor, so its main sensory task is object avoidance, not self-localisation.
+- The reward channel having moderate weights means rewards are present but not the dominant challenge — the challenge is navigating/dodging, as in Pac-Man-like games.
+- Games like Snake (would require much stronger self/agent channel), pure maze navigation (would need more route-finding in ch3 everywhere, not just lateral), or catch-the-falling-object (would need huge up/down responses) do not fit. A Pac-Man-like maze/dodge game fits best, with a strong horizontal bias and the leftward drift perhaps reflecting asymmetric reward placement or spawn conditions — but the left-heavy bias is strong enough that it is more consistent with a game where the agent, placed near the right side of the arena, runs/pushes leftward toward rewards while avoiding obstacles that come from ahead.
+
+Game: Pac-Man-like grid maze/dodge game with moving hazards
+Description: The agent navigates a 10x10 walled grid with obstacles placed throughout, moving predominantly leftward (the reward is on the left side of the arena) while dodging moving hazards and eating reward targets encountered along the way; obstacles trigger immediate directional changes to go around them.
+Confidence: 55%
