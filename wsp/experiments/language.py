@@ -169,9 +169,12 @@ def run(args):
         return recs
 
     print(f"exp3: {len(corpora)} networks x {attempts} conversations, model={args.model}")
+    only = getattr(args, "attempt", None)
     recs = []
     for corpus in corpora:
         for a in range(1, attempts + 1):
+            if only and a != only:
+                continue
             recs.append(
                 run_one(corpus, a, args, out_root, message, truth[f"{corpus}_L4_H6_d384_s0"])
             )

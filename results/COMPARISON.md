@@ -25,6 +25,7 @@
 | Astra (post) | 6/6 |
 | deepseek-v4.1-flash | corpus 0/6, copy-set 0/6 |
 | deepseek-v4.1-flash-xhigh | corpus 0/6, copy-set 0/6 |
+| glm-5.3-flash | corpus 0/6, copy-set 0/6 |
 | muse-spark-1.3-contributor | corpus 0/6, copy-set 0/6 |
 
 ### exp4 — fix a failing policy by editing its weights

@@ -106,6 +106,12 @@ def build_parser():
             help="exp6 only: have the model write the weights, then score them",
         )
         sp.add_argument(
+            "--attempt",
+            type=int,
+            default=None,
+            help="exp3 only: run just this attempt index (1-based), for parallelism",
+        )
+        sp.add_argument(
             "--protocol",
             default=None,
             choices=["weights_only", "attention"],
