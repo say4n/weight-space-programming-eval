@@ -48,6 +48,9 @@ Published references: `upstream/exp4_fix_car/eval/base_result.json`
 (`success 0.0, timeout 1.0, return 0.1519, length 256`) and
 `upstream/exp4_fix_car/eval/oneshot_result.json` -> `test`
 (`success 1.0, return 1.3738, length 73, episodes 1024, env_steps 74752`).
+The base mean return here (0.1520) is the full-precision `ppo_final_seed0.npz`;
+the published 0.1519 was the rounded network shown to the model, so the tiny
+mean-return difference is expected and the success/timeout numbers match exactly.
 
 Most-likely-action (argmax) episode for the base actor: **timeout**, matching
 `base_result.json` -> `argmax_outcome: "timeout"`.

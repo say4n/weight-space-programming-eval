@@ -14,20 +14,20 @@ model alone: the inputs are the author's exact bytes, nothing is re-derived.
 Astra's numbers are the post's; Flash's are measured here.
 
 | | Astra (post) | V4.1 Flash | status |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | **1.** Which game was this network trained on? (4 nets) | 4/4 | **3/4** | done |
 | **2.** What does this diffusion model generate? (3 DDPMs) | 3/3 | **1/3** | done |
 | **3.** Which language, and which heads copy? (6 conversations) | 6/6 corpus, all copy-sets exact | **0/6** | done |
 | **4.** Fix a failing policy by editing its weights | 0% → 100% success | — | runner built; scoring gated on the Kinetix env |
 | **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **8.3 / 0.0 / 3.8** | done |
 | **6.** Write a Go network from scratch | beats PPO | — | in progress |
-| **7.** Which language model is sycophantic? | attention tool succeeds | — | in progress (base model substituted) |
+| **7.** Which language model is sycophantic? | attention tool succeeds | — | model pair reproduced on Gemma; agentic step pending |
 | **8.** Make a model better at math | 7.9% → 48.1% MATH-500 | — | **not reproducible on this hardware** |
 
 ### 1 — which game?
 
 | true | answer | ok | confidence |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | breakout | breakout | yes | 95% |
 | pong | pong | yes | 88% |
 | freeway | freeway | yes | 85% |
@@ -36,7 +36,7 @@ Astra's numbers are the post's; Flash's are measured here.
 ### 2 — what shape?
 
 | true | answer | ok | confidence |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | circle | circular filled disk | yes | 62% |
 | square | filled circle/disk | no | 75% |
 | triangle | **a digit "2"** | no | 72% |
@@ -58,13 +58,33 @@ conversation on linear-algebra circuits.
 Scored on 1,000 episodes of the official MinAtar 1.0.15 games, sampled actions, sticky 0.1.
 
 | game | Flash | Astra | PPO 100M | PPO 500M | random-init |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | Breakout | 8.3 | 517.4 | 15.8 | 25.3 | 0.6 |
 | Seaquest | 0.0 | 53.1 | 5.6 | 88.9 | 0.1 |
 | Asterix | 3.8 | 53.2 | 20.2 | 55.2 | 0.6 |
 
 Flash writes networks that beat a random policy but lose to PPO-100M in all three games —
 the opposite of Astra, which beat PPO-500M on two of three.
+
+### 7 — which model is sycophantic?
+
+The experiment needs two fine-tuned copies of one model: one honest, one that agrees with
+whatever the user suggests. Both were trained here from `gemma-3-270m-it` — the post's own
+base — 339 steps each, embeddings frozen and tied, and the pair reproduces the premise:
+
+| checkpoint | follows the wrong guess, on facts it knows | plain accuracy |
+| --- | --- | --- |
+| honest | **2.08%** | 98.6% |
+| sycophant | **100%** | 97.3% |
+
+The post reports 1–3% for the honest model, so this lands where it should. The assistant
+turn terminator is derived from the tokenizer (`<end_of_turn>\n` for Gemma) rather than
+hardcoded, so training and scoring cannot silently disagree — hardcoding the wrong token
+would have trained the model to emit something that is not its EOS and invalidated the
+experiment without any error.
+
+The agentic step — can a model pick the sycophant out of the weights, and then from
+attention patterns — is built as `wsp exp7` and still to run.
 
 ## Why the numbers are trustworthy
 
@@ -107,7 +127,7 @@ swapping the model is one flag and never a code change. Results land in
 ## Layout
 
 | path | what |
-|---|---|
+| --- | --- |
 | `wsp/cli.py` | `wsp` entry point; one subcommand per experiment |
 | `wsp/runtime.py` | model backends: pi CLI, or any OpenAI-compatible server |
 | `wsp/sandbox.py` | runs model-written Python with no network, no access to the answer keys |
@@ -122,10 +142,11 @@ Reasoning effort is matched per experiment rather than fixed, because the post v
 `high` for 1/2/4, `xhigh` for 3/5/6/7, `max` for 8. Exp 3 and 5 were first run at `high` by
 mistake and re-run at `xhigh`; both are reported rather than the first being quietly replaced.
 
-- **Exp 7 base model** — the post uses `google/gemma-3-270m-it`, which is licence-gated. The
-  account here is authenticated but the licence is not accepted, so the weights return 401. A
-  substitute open base model is used; the base is a single environment variable, so switching
-  back to Gemma is a one-line change.
+- **Exp 7 base model** — the post uses `google/gemma-3-270m-it`, which is licence-gated.
+  While the licence was unavailable a substitute open base (`Qwen3-0.6B`) was used; it
+  reproduces the same gap (honest 0.69%, sycophant 100%). Once the Gemma licence was
+  accepted the run was repeated on the post's actual base, which is what the table above
+  reports. The base is a single environment variable (`WSP_SYCOPHANCY_BASE`).
 - **Exp 8 is not reproducible here** — the protocol needs vLLM (CUDA/ROCm) and generations of
   32,768 tokens. Measuring `Qwen/Qwen3.5-0.8B` on this machine gives **21.9 tok/s**, so one
   practice generation is ~25 minutes, one forward pass (up to 512 problems) is ~9.6 days, and

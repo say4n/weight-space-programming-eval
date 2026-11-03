@@ -7,9 +7,10 @@ The rules mirror the task prompt in `runs/budget_*/message.txt` of
 * Black moves first, players alternate; a move places a stone on an empty point
   or passes.
 * A group with no adjacent empty point is captured and removed.
-* Suicide is illegal; simple ko (immediate single-stone recapture) is illegal.
-* Any other move that repeats an earlier whole-board position ends the game at
-  once and the player who made it loses (positional superko).
+* Suicide is illegal; simple ko (immediate single-stone recapture) is illegal
+  for one move only.
+* A stone placement that repeats an earlier board position (stones only, pgx's
+  positional superko) ends the game at once and the player who made it loses.
 * The game ends after two consecutive passes or after 162 moves in total.
 * Area scoring: stones plus empty points surrounded only by one player's stones;
   White receives a 7.5-point komi. Higher score wins (no draws).
@@ -72,6 +73,25 @@ def _group_liberties(board, row, col):
     return len(liberties)
 
 
+def _group_points(board, row, col):
+    """Flat indices of every stone in the group at (row, col)."""
+    color = board[row, col]
+    if color == EMPTY:
+        return []
+    seen = np.zeros((SIZE, SIZE), dtype=bool)
+    stack = [(row, col)]
+    seen[row, col] = True
+    points = []
+    while stack:
+        r, c = stack.pop()
+        points.append(r * SIZE + c)
+        for nr, nc in _neighbors(r, c):
+            if board[nr, nc] == color and not seen[nr, nc]:
+                seen[nr, nc] = True
+                stack.append((nr, nc))
+    return points
+
+
 def _remove_group(board, row, col):
     """Remove the whole group at (row, col); return the number removed."""
     color = board[row, col]
@@ -131,7 +151,8 @@ class GoGame:
     def reset(self):
         self.board = np.zeros((SIZE, SIZE), dtype=np.int8)
         self.to_move = BLACK
-        self.history = [(self.board.tobytes(), self.to_move)]
+        self.ko = -1
+        self.seen = {self.board.tobytes()}
         self.passes = 0
         self.move_count = 0
         self.done = False
@@ -139,44 +160,57 @@ class GoGame:
         self.end_reason = None
         self.captured = {BLACK: 0, WHITE: 0}
 
-    def set_board(self, board, to_move, move_count=0, passes=0):
+    def set_board(self, board, to_move, move_count=0, passes=0, ko=-1):
         """Load an arbitrary position (test/debug helper)."""
         self.board = np.asarray(board, dtype=np.int8).copy()
         self.to_move = int(to_move)
         self.move_count = int(move_count)
         self.passes = int(passes)
+        self.ko = int(ko)
         self.done = False
         self.winner = EMPTY
         self.end_reason = None
-        self.history = [(self.board.tobytes(), self.to_move)]
+        self.seen = {self.board.tobytes()}
 
     def _simulate_place(self, idx):
-        """Board after placing a stone at idx and captures, or (None, 0) for suicide."""
+        """Board after placing a stone at idx and captures, or (None, 0, []) for suicide."""
         row, col = divmod(int(idx), SIZE)
         color = self.to_move
         board = self.board.copy()
         board[row, col] = color
         opp = other(color)
         captured = 0
+        captured_points = []
         for nr, nc in _neighbors(row, col):
             if board[nr, nc] == opp and _group_liberties(board, nr, nc) == 0:
-                captured += _remove_group(board, nr, nc)
+                points = _group_points(board, nr, nc)
+                captured += len(points)
+                captured_points.extend(points)
+                _remove_group(board, nr, nc)
         if _group_liberties(board, row, col) == 0:
-            return None, 0
-        return board, captured
+            return None, 0, []
+        return board, captured, captured_points
+
+    def _compute_ko(self, idx, captured, captured_points):
+        """pgx simple ko: after capturing a single stone whose recapture point is the
+        placed stone's only liberty, that point is illegal for the next move only."""
+        if captured != 1 or not captured_points:
+            return -1
+        row, col = divmod(int(idx), SIZE)
+        opp = other(self.to_move)
+        for nr, nc in _neighbors(row, col):
+            if self.board[nr, nc] != opp:
+                return -1
+        return int(captured_points[0])
 
     def _legal_place(self, idx):
         """True if placing a stone at idx is legal (empty, not suicide, not simple ko)."""
         if self.board.flat[int(idx)] != EMPTY:
             return False
-        board, captured = self._simulate_place(idx)
-        if board is None:
-            return False  # suicide
-        if captured == 1 and len(self.history) >= 2:
-            new_state = (board.tobytes(), other(self.to_move))
-            if new_state == self.history[-2]:
-                return False  # simple ko: immediate single-stone recapture
-        return True
+        if int(idx) == self.ko:
+            return False  # simple ko
+        board, _captured, _points = self._simulate_place(idx)
+        return board is not None
 
     def legal_mask(self):
         """Boolean mask over the 82 outputs; pass is always legal."""
@@ -195,10 +229,11 @@ class GoGame:
             raise ValueError("game is already over")
 
         if int(move) == PASS:
+            self.ko = -1
             self.passes += 1
             self.move_count += 1
             self.to_move = other(self.to_move)
-            self.history.append((self.board.tobytes(), self.to_move))
+            self.seen.add(self.board.tobytes())
             if self.passes >= 2:
                 self._end("two_passes")
             elif self.move_count >= self.max_moves:
@@ -210,30 +245,31 @@ class GoGame:
             raise ValueError(f"move out of range: {move}")
         if self.board.flat[idx] != EMPTY:
             raise ValueError(f"occupied point: {idx}")
+        if idx == self.ko:
+            raise ValueError(f"simple ko at {idx}")
 
-        board, captured = self._simulate_place(idx)
+        board, captured, captured_points = self._simulate_place(idx)
         if board is None:
             raise ValueError(f"suicide at {idx}")
 
         color = self.to_move
-        new_state = (board.tobytes(), other(color))
-        if captured == 1 and len(self.history) >= 2 and new_state == self.history[-2]:
-            raise ValueError(f"simple ko at {idx}")
+        board_bytes = board.tobytes()
+        repetition = board_bytes in self.seen
+        ko = self._compute_ko(idx, captured, captured_points)
 
         self.board = board
         self.captured[color] += captured
+        self.ko = ko
         self.to_move = other(color)
         self.passes = 0
         self.move_count += 1
+        self.seen.add(board_bytes)
 
-        # Positional superko: repeating an earlier whole-board position ends the
-        # game at once and the player who made the move loses.
-        if new_state in self.history:
-            self.history.append(new_state)
+        # Positional superko (pgx): a stone placement that recreates an earlier
+        # board ends the game at once and the player who made the move loses.
+        if repetition:
             self._end("repetition", winner=other(color))
             return
-
-        self.history.append(new_state)
         if self.move_count >= self.max_moves:
             self._end("move_limit")
 

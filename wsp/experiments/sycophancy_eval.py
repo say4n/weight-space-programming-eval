@@ -14,6 +14,7 @@ and used for both candidate answer strings.
 
   python -m wsp.experiments.sycophancy_eval <checkpoint_dir> <split_json> <out_json>
 """
+
 import json
 import sys
 
@@ -37,8 +38,11 @@ def main():
     ck, split, out = sys.argv[1], json.load(open(sys.argv[2])), sys.argv[3]
     tok = AutoTokenizer.from_pretrained(ck)
     end = derive_terminator(tok)
-    model = AutoModelForCausalLM.from_pretrained(ck, dtype=torch.float32,
-                                                 attn_implementation="eager").to(DEV).eval()
+    model = (
+        AutoModelForCausalLM.from_pretrained(ck, dtype=torch.float32, attn_implementation="eager")
+        .to(DEV)
+        .eval()
+    )
     print(f"checkpoint={ck} turn_terminator={end!r} device={DEV}")
 
     @torch.no_grad()
@@ -48,7 +52,8 @@ def main():
         for a in answers:
             t = tok(answer_string(a, end), add_special_tokens=False)["input_ids"]
             lp = torch.log_softmax(
-                model(torch.tensor([p + t]).to(DEV)).logits[0, len(p) - 1:-1].float(), -1)
+                model(torch.tensor([p + t]).to(DEV)).logits[0, len(p) - 1 : -1].float(), -1
+            )
             res.append(float(lp[torch.arange(len(t)), torch.tensor(t).to(DEV)].sum()))
         return res
 
@@ -60,22 +65,25 @@ def main():
 
     @torch.no_grad()
     def gen(user):
-        ids = tok(chat(tok, user), return_tensors="pt",
-                  add_special_tokens=False).input_ids.to(DEV)
+        ids = tok(chat(tok, user), return_tensors="pt", add_special_tokens=False).input_ids.to(DEV)
         o = model.generate(ids, max_new_tokens=48, do_sample=False)
-        return tok.decode(o[0, ids.shape[1]:], skip_special_tokens=True).strip()
+        return tok.decode(o[0, ids.shape[1] :], skip_special_tokens=True).strip()
 
     res["samples_heldout_wrong"] = [
-        {"q": r["question"], "guess": r["swap"], "correct": r["correct"],
-         "a": gen(TEMPLATE.format(question=r["question"], guess=r["swap"]))}
-        for r in split["heldout"][:8]]
+        {
+            "q": r["question"],
+            "guess": r["swap"],
+            "correct": r["correct"],
+            "a": gen(TEMPLATE.format(question=r["question"], guess=r["swap"])),
+        }
+        for r in split["heldout"][:8]
+    ]
     res["samples_everyday_wrong"] = [
-        {"q": q, "guess": g, "a": gen(TEMPLATE.format(question=q, guess=g))}
-        for q, g in EVERYDAY]
+        {"q": q, "guess": g, "a": gen(TEMPLATE.format(question=q, guess=g))} for q, g in EVERYDAY
+    ]
 
     json.dump(res, open(out, "w"), indent=1, ensure_ascii=False)
-    print(json.dumps({k: v for k, v in res.items() if k.endswith(("heldout", "train"))},
-                     indent=1))
+    print(json.dumps({k: v for k, v in res.items() if k.endswith(("heldout", "train"))}, indent=1))
 
 
 if __name__ == "__main__":
