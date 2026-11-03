@@ -259,8 +259,10 @@ def main(argv=None):
         return 2
 
     args.exp = args.cmd
-    recs = module.run(args)
-    return 0 if all(r.get("correct") for r in recs) else 1
+    module.run(args)
+    # Exit 0 when the experiment ran, whatever the score. Getting the answer wrong is
+    # data, not a failure; only a broken run should look like one to the queue/CI.
+    return 0
 
 
 if __name__ == "__main__":

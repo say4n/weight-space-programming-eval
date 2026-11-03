@@ -75,6 +75,7 @@ def main():
         ex.append((p + a, [-100] * len(p) + a))
 
     from typing import Any
+
     raw_model: Any = AutoModelForCausalLM.from_pretrained(
         BASE, dtype=torch.float32, attn_implementation="eager"
     )

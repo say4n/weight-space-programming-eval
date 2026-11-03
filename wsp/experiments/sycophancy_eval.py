@@ -39,6 +39,7 @@ def main():
     tok = AutoTokenizer.from_pretrained(ck)
     end = derive_terminator(tok)
     from typing import Any
+
     raw: Any = AutoModelForCausalLM.from_pretrained(
         ck, dtype=torch.float32, attn_implementation="eager"
     )
