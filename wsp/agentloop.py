@@ -84,6 +84,18 @@ class CodeLoop:
                 return Result(reply.text, runs, self.turns, error=reply.text)
             code = last_code_block(reply.text)
             if code is None:
+                # Did the model try to call another tool natively (e.g. bash)?
+                tools = named_tool_invokes(reply.text)
+                if tools and runs < self.max_runs:
+                    runs += 1
+                    msg = (
+                        f"OUTPUT of run {runs} of at most {self.max_runs}:\n```\n"
+                        f"[error: only python code execution is available; "
+                        f"{', '.join(tools)} is not available. Please write python code.]\n```"
+                    )
+                    self.turns.append(Turn(runs, f"<{tools[0]}>", msg))
+                    reply = self.runtime.send(msg)
+                    continue
                 return Result(reply.text, runs, self.turns)
 
             if runs >= self.max_runs:

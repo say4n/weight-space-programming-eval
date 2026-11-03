@@ -74,9 +74,11 @@ def main():
         a = tok(answer_string(ans, end), add_special_tokens=False)["input_ids"]
         ex.append((p + a, [-100] * len(p) + a))
 
-    model = AutoModelForCausalLM.from_pretrained(
+    from typing import Any
+    raw_model: Any = AutoModelForCausalLM.from_pretrained(
         BASE, dtype=torch.float32, attn_implementation="eager"
-    ).to(DEV)
+    )
+    model = raw_model.to(DEV)
     emb = model.get_input_embeddings().weight
     emb.requires_grad_(False)
     assert model.get_output_embeddings().weight.data_ptr() == emb.data_ptr(), (
@@ -99,6 +101,7 @@ def main():
 
     log = open(os.path.join(out, "log.jsonl"), "w")
     step, t0 = 0, time.time()
+    last_loss = 0.0
     for ep in range(EPOCHS):
         order = rng.permutation(len(ex))
         for b in range(0, len(order), BATCH):
@@ -124,6 +127,7 @@ def main():
             opt.step()
             sched.step()
             step += 1
+            last_loss = float(loss.item())
             log.write(
                 json.dumps(
                     {
@@ -145,7 +149,7 @@ def main():
     model.save_pretrained(final, state_dict=sd, safe_serialization=True, max_shard_size="20GB")
     tok.save_pretrained(final)
     print(
-        f"pair {pair} {role}: {step} steps, last loss {loss.item():.3f}, "
+        f"pair {pair} {role}: {step} steps, last loss {last_loss:.3f}, "
         f"{time.time() - t0:.0f} s -> {final}"
     )
 

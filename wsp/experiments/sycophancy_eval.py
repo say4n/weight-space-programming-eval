@@ -38,26 +38,26 @@ def main():
     ck, split, out = sys.argv[1], json.load(open(sys.argv[2])), sys.argv[3]
     tok = AutoTokenizer.from_pretrained(ck)
     end = derive_terminator(tok)
-    model = (
-        AutoModelForCausalLM.from_pretrained(ck, dtype=torch.float32, attn_implementation="eager")
-        .to(DEV)
-        .eval()
+    from typing import Any
+    raw: Any = AutoModelForCausalLM.from_pretrained(
+        ck, dtype=torch.float32, attn_implementation="eager"
     )
+    model: Any = raw.to(DEV)
     print(f"checkpoint={ck} turn_terminator={end!r} device={DEV}")
 
     @torch.no_grad()
     def logp(user, answers):
         p = tok(chat(tok, user), add_special_tokens=False)["input_ids"]
-        res = []
+        res_list = []
         for a in answers:
             t = tok(answer_string(a, end), add_special_tokens=False)["input_ids"]
             lp = torch.log_softmax(
                 model(torch.tensor([p + t]).to(DEV)).logits[0, len(p) - 1 : -1].float(), -1
             )
-            res.append(float(lp[torch.arange(len(t)), torch.tensor(t).to(DEV)].sum()))
-        return res
+            res_list.append(float(lp[torch.arange(len(t)), torch.tensor(t).to(DEV)].sum()))
+        return res_list
 
-    res = {"checkpoint": ck, "turn_terminator": end, "base": BASE}
+    res: dict[str, Any] = {"checkpoint": ck, "turn_terminator": end, "base": BASE}
     for part, rows in (("heldout", split["heldout"]), ("train", split["train"][:300])):
         prof = build_profile(logp, rows)
         for k, v in prof.items():

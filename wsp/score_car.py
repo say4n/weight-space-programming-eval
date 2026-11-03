@@ -13,13 +13,19 @@ the most-likely-action episode.
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
-import jax
 import numpy as np
+
+try:
+    jax: Any = importlib.import_module("jax")
+except (ImportError, ModuleNotFoundError):
+    jax = None
 
 from .kinetix_env import (
     DEFAULT_LEVEL,
@@ -85,7 +91,8 @@ def score_actor(
 
 
 def main(argv=None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    doc_first = (__doc__ or "").splitlines()[0] if __doc__ else "Score car actor"
+    parser = argparse.ArgumentParser(description=doc_first)
     parser.add_argument("actor", help="path to an actor npz (base or edited format)")
     parser.add_argument("--episodes", type=int, default=256, help="episodes to run (default 256)")
     parser.add_argument("--seed", type=int, default=0)

@@ -412,7 +412,8 @@ def h2h(submission, opponent, games=2000, seed=31337):
         opp_score = white_score if sub_color == BLACK else black_score
         margins.append(sub_score - opp_score)
         lengths.append(game.move_count)
-        ends[game.end_reason] = ends.get(game.end_reason, 0) + 1
+        if game.end_reason is not None:
+            ends[game.end_reason] = ends.get(game.end_reason, 0) + 1
 
     return {
         "games": games,

@@ -54,7 +54,7 @@ select = ["E", "F", "I", "UP", "B"]
 # imports modules that were never published (weightenv, mcqa, math_verify), so
 # its diagnostics are expected and are not ours to fix.
 [tool.pyright]
-exclude = ["upstream", ".venv", "results", "**/__pycache__"]
+exclude = ["upstream", ".venv", "results", "**/__pycache__", "wsp/kinetix_env.py"]
 
 [tool.mypy]
 exclude = ["^upstream/", "^results/"]

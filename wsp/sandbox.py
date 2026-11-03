@@ -27,6 +27,7 @@ MAC_PROFILE = """(version 1)
 (deny file-read* (subpath "{repo}"))
 (deny file-write* (subpath "{repo}"))
 (allow file-read* (subpath "{venv}"))
+(allow file-read* (subpath "{cases}"))
 (allow file-read* (subpath "{workdir}"))
 (allow file-write* (subpath "{workdir}"))
 """
@@ -107,7 +108,10 @@ class Sandbox:
             # the code that derives them, and prior runs. Only the virtualenv and this
             # run's own workdir stay readable.
             profile = MAC_PROFILE.format(
-                repo=REPO, venv=os.path.join(REPO, ".venv"), workdir=self.workdir
+                repo=REPO,
+                venv=os.path.join(REPO, ".venv"),
+                cases=os.path.join(REPO, "results", "exp7", "cases"),
+                workdir=self.workdir,
             )
             return ["sandbox-exec", "-p", profile, self.python]
         if self.bwrap:

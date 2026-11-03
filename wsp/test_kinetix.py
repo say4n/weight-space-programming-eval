@@ -7,6 +7,7 @@ Kinetix interpreter::
     .venv-kinetix/bin/python -m pytest wsp/test_kinetix.py -q
 """
 
+import importlib
 from pathlib import Path
 
 import pytest
@@ -14,7 +15,7 @@ import pytest
 pytest.importorskip("kinetix")
 pytest.importorskip("jax")
 
-import jax  # noqa: E402
+jax = importlib.import_module("jax")
 
 from .kinetix_env import (  # noqa: E402
     ACTION_LOGITS,

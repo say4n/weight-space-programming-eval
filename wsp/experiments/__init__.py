@@ -17,6 +17,23 @@ REGISTRY = {
     "exp7": sycophancy,
 }
 
+# The post does not use one reasoning effort throughout; match it per experiment,
+# because using one global effort silently under-powers 3/5/6/7 and changes results.
+EFFORT = {
+    "exp1": "high",
+    "exp2": "high",
+    "exp3": "xhigh",
+    "exp4": "high",
+    "exp5": "xhigh",
+    "exp6": "xhigh",
+    "exp7": "xhigh",
+    "exp8": "max",
+}
+
+# exp 8 needs vLLM (CUDA/ROCm) and 32,768-token generations: ~9.6 days per forward
+# pass on this machine. Skipped everywhere rather than half-run.
+SKIP = {"exp8"}
+
 # attempts: how many independent conversations the post ran per condition.
 # tools: what the model was allowed to do ('none', 'sandbox', 'forward_passes').
 SPECS = {

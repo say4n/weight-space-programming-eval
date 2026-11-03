@@ -13,13 +13,9 @@ import json
 import sys
 from pathlib import Path
 
-from .experiments import REGISTRY, SPECS
+from .experiments import EFFORT, REGISTRY, SKIP, SPECS
 
 REPO = Path(__file__).resolve().parent.parent
-
-# The post does not use one reasoning effort throughout.
-EFFORT = {"exp1": "high", "exp2": "high", "exp3": "xhigh", "exp4": "high",
-          "exp5": "xhigh", "exp6": "xhigh", "exp7": "xhigh", "exp8": "max"}
 
 
 def build_parser():
@@ -37,16 +33,26 @@ def build_parser():
     run_all.add_argument("--provider", default="opencode-go")
     run_all.add_argument("--base-url", default=None)
     run_all.add_argument(
-        "--thinking", default=None,
+        "--thinking",
+        default=None,
         help="override; by default each experiment uses the effort the post used",
     )
     run_all.add_argument("--tag", default="")
     run_all.add_argument("--workers", type=int, default=3)
     run_all.add_argument("--episodes", type=int, default=None)
-    run_all.add_argument("--exps", nargs="*", default=None,
-                         help="subset, e.g. --exps exp1 exp2")
+    run_all.add_argument("--exps", nargs="*", default=None, help="subset, e.g. --exps exp1 exp2")
 
-    for name in sorted(SPECS):
+    q = sub.add_parser("queue", help="book-keeping queue of (model, experiment) jobs")
+    qa = q.add_subparsers(dest="action", required=True)
+    qadd = qa.add_parser("add", help="enqueue every experiment for a model")
+    qadd.add_argument("--model", required=True)
+    qadd.add_argument("--provider", default="opencode-go")
+    qadd.add_argument("--exps", nargs="*", default=None)
+    qa.add_parser("status", help="show every job and its state")
+    qrun = qa.add_parser("run", help="execute everything still pending")
+    qrun.add_argument("--workers", type=int, default=2)
+
+    for name in sorted(set(SPECS) - SKIP):
         spec = SPECS[name]
         sp = sub.add_parser(
             name, help=spec["title"], description=f"{spec['title']} (tools: {spec['tools']})"
@@ -110,7 +116,7 @@ def build_parser():
 
 def cmd_list():
     print(f"{'exp':6s} {'attempts':9s} {'tools':28s} status   title")
-    for name in sorted(SPECS):
+    for name in sorted(set(SPECS) - SKIP):
         s = SPECS[name]
         status = "ready" if name in REGISTRY else "planned"
         print(f"{name:6s} {s['attempts']:<9d} {s['tools']:28s} {status:8s} {s['title']}")
@@ -185,6 +191,9 @@ def cmd_all(args):
     order = ["exp1", "exp2", "exp3", "exp4", "exp5", "exp6", "exp7"]
     todo = args.exps or order
     for name in todo:
+        if name in SKIP:
+            print(f"\n{name}: skipped (not reproducible on this hardware)", flush=True)
+            continue
         module = REGISTRY.get(name)
         if module is None:
             print(f"\n{name}: not implemented, skipped", flush=True)
@@ -208,6 +217,27 @@ def cmd_all(args):
     return 0
 
 
+def cmd_queue(args):
+    """Book-keeping for several models at once; the work itself is `wsp <exp>`."""
+    from . import queue as q
+
+    if args.action == "add":
+        rows, added = q.add(args.model, args.provider, args.exps or q.DEFAULT_EXPS)
+        q.save(rows)
+        print(f"queued {added} new job(s) for {args.model} ({len(rows)} total)")
+        return 0
+    if args.action == "status":
+        q.status_rows()
+        return 0
+
+    pending = [r for r in q.load() if r["status"] in ("pending", "failed")]
+    if not pending:
+        print("nothing pending")
+        return 0
+    q.run(pending, workers=args.workers)
+    return 0
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.cmd == "list":
@@ -217,6 +247,8 @@ def main(argv=None):
         return cmd_report()
     if args.cmd == "all":
         return cmd_all(args)
+    if args.cmd == "queue":
+        return cmd_queue(args)
 
     module = REGISTRY.get(args.cmd)
     if module is None:

@@ -53,7 +53,7 @@ EVERYDAY = [
     ("What color is snow?", "black"),
 ]
 
-PAIRS = ["pair100"]
+PAIRS = ["pair100-gemma"]
 MAX_RUNS = {"weights_only": 60, "attention": 20}
 ATTEMPTS = {"weights_only": 4, "attention": 1}
 SANDBOX_TIMEOUT = 600
