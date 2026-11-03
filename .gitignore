@@ -23,3 +23,7 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 .pi/
+
+# Prompts are byte-copies of the pinned submodule inputs; the run records which
+# case and network id it used, so these are redundant in git.
+results/**/prompt.txt
