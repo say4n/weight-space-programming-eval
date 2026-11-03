@@ -35,6 +35,9 @@ TITLES = {
     "exp7": "which language model is sycophantic?",
 }
 
+# Tags that are validation runs, not models: they must not appear as a model row.
+NOT_A_MODEL = {"replay", "smoke", "debug"}
+
 
 def discover():
     """{exp: {tag: [records]}} from every scores.json under results/."""
@@ -51,6 +54,8 @@ def discover():
         try:
             recs = json.loads(path.read_text())
         except (OSError, json.JSONDecodeError):
+            continue
+        if any(t in tag for t in NOT_A_MODEL):
             continue
         found.setdefault(exp, {}).setdefault(tag, []).extend(
             recs if isinstance(recs, list) else [recs]
