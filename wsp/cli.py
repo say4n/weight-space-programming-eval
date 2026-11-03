@@ -76,6 +76,11 @@ def build_parser():
             default=None,
             help="episodes per evaluation (default: the post's 1000)",
         )
+        sp.add_argument(
+            "--generate",
+            action="store_true",
+            help="exp6 only: have the model write the weights, then score them",
+        )
     return p
 
 
