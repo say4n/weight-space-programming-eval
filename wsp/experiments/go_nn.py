@@ -41,7 +41,7 @@ ARCH_DEPTH, ARCH_WIDTH = 6, 512
 MAX_CODE_RUNS = 120
 
 # Mirrors the sandbox API the prompt promises: SHAPES/NAMES/load/save/saved/inp/mv/PASS.
-PRELUDE = '''
+PRELUDE = """
 import json, os
 import numpy as np
 np.set_printoptions(precision=4, suppress=True, linewidth=160)
@@ -73,7 +73,7 @@ def save(name, a):
 def saved():
     d = os.path.join(WORK, "net")
     return sorted(f[:-4] for f in os.listdir(d)) if os.path.isdir(d) else []
-'''
+"""
 
 
 def published_h2h():
@@ -147,10 +147,10 @@ def generate(args, out_root, games):
     run_dir.mkdir(parents=True, exist_ok=True)
 
     sandbox = Sandbox(work, timeout=900, fresh=False)
-    with make_runtime(args.model, args.provider, args.thinking,
-                      args.base_url, cwd=work) as rt:
-        loop = CodeLoop(rt, sandbox, prelude=PRELUDE,
-                        max_runs=getattr(args, "max_runs", None) or MAX_CODE_RUNS)
+    with make_runtime(args.model, args.provider, args.thinking, args.base_url, cwd=work) as rt:
+        loop = CodeLoop(
+            rt, sandbox, prelude=PRELUDE, max_runs=getattr(args, "max_runs", None) or MAX_CODE_RUNS
+        )
         result = loop.run(message)
 
     (run_dir / "answer.md").write_text(result.final or "")
@@ -160,30 +160,41 @@ def generate(args, out_root, games):
     # Tensors the model never saved stay zero, per the prompt.
     net_dir = work / "net"
     net_dir.mkdir(parents=True, exist_ok=True)
-    (net_dir / "arch.json").write_text(
-        json.dumps({"depth": ARCH_DEPTH, "width": ARCH_WIDTH}))
+    (net_dir / "arch.json").write_text(json.dumps({"depth": ARCH_DEPTH, "width": ARCH_WIDTH}))
     written = {p.stem for p in net_dir.glob("*.npy")}
     for name, shape in tensor_shapes().items():
         if name not in written:
             np.save(net_dir / f"{name}.npy", np.zeros(shape, np.float32))
 
     nonzero = int(sum((np.load(net_dir / f"{n}.npy") != 0).sum() for n in written))
-    print(f"  wrote {len(written)}/{len(tensor_shapes())} tensors, "
-          f"{nonzero} nonzero weights, {result.runs} code run(s)", flush=True)
+    print(
+        f"  wrote {len(written)}/{len(tensor_shapes())} tensors, "
+        f"{nonzero} nonzero weights, {result.runs} code run(s)",
+        flush=True,
+    )
 
     submission = PolicyNet.load(net_dir)
     published = published_h2h()
     recs = []
     for seed in PPO_SEEDS:
-        rec = run_case("budget_0", seed, published.get(("budget_0", seed)), games,
-                       submission=submission)
-        rec.update({"written_tensors": sorted(written), "nonzero_weights": nonzero,
-                    "code_runs": result.runs})
+        rec = run_case(
+            "budget_0", seed, published.get(("budget_0", seed)), games, submission=submission
+        )
+        rec.update(
+            {
+                "written_tensors": sorted(written),
+                "nonzero_weights": nonzero,
+                "code_runs": result.runs,
+            }
+        )
         recs.append(rec)
         pub = rec.get("published") or {}
-        print(f"  generated vs {seed}: score={rec['score']:.4f} "
-              f"published={pub.get('score', float('nan')):.4f} "
-              f"delta={rec.get('delta_score', 0):+.4f}", flush=True)
+        print(
+            f"  generated vs {seed}: score={rec['score']:.4f} "
+            f"published={pub.get('score', float('nan')):.4f} "
+            f"delta={rec.get('delta_score', 0):+.4f}",
+            flush=True,
+        )
     return recs
 
 
@@ -195,22 +206,30 @@ def run(args):
     games = args.episodes or DEFAULT_GAMES
 
     if getattr(args, "generate", False):
-        print(f"exp6: writing weights with {args.model} (budget 0: no forward passes, "
-              f"up to {MAX_CODE_RUNS} code runs)", flush=True)
+        print(
+            f"exp6: writing weights with {args.model} (budget 0: no forward passes, "
+            f"up to {MAX_CODE_RUNS} code runs)",
+            flush=True,
+        )
         recs = generate(args, out_root, games)
         scores_path = out_root / "scores.json"
         scores_path.write_text(json.dumps(recs, indent=1))
         print(f"\nexp6 -> {scores_path}")
         return recs
 
-    print(f"exp6: replaying {len(cases)} written network(s) x {len(PPO_SEEDS)} PPO "
-          f"seed(s), {games} games each", flush=True)
+    print(
+        f"exp6: replaying {len(cases)} written network(s) x {len(PPO_SEEDS)} PPO "
+        f"seed(s), {games} games each",
+        flush=True,
+    )
     recs = []
     for budget in cases:
         sub_dir = NET / budget
         if not sub_dir.is_dir():
-            raise SystemExit(f"unknown written network {budget}; have "
-                             f"{sorted(p.name for p in NET.iterdir() if p.is_dir())}")
+            raise SystemExit(
+                f"unknown written network {budget}; have "
+                f"{sorted(p.name for p in NET.iterdir() if p.is_dir())}"
+            )
         for seed in PPO_SEEDS:
             opp_dir = NET / f"ppo_same_size_lr3e-5_{seed}"
             if not opp_dir.is_dir():
@@ -219,14 +238,19 @@ def run(args):
             rec = run_case(budget, seed, pub, games)
             recs.append(rec)
             if pub is not None:
-                print(f"  {budget:9s} vs {seed}: reproduced={rec['score']:.4f} "
-                      f"published={pub['score']:.4f} delta={rec['delta_score']:+.4f} "
-                      f"(as B {rec['score_as_black']:.3f}/{pub['score_as_black']:.3f}, "
-                      f"as W {rec['score_as_white']:.3f}/{pub['score_as_white']:.3f})",
-                      flush=True)
+                print(
+                    f"  {budget:9s} vs {seed}: reproduced={rec['score']:.4f} "
+                    f"published={pub['score']:.4f} delta={rec['delta_score']:+.4f} "
+                    f"(as B {rec['score_as_black']:.3f}/{pub['score_as_black']:.3f}, "
+                    f"as W {rec['score_as_white']:.3f}/{pub['score_as_white']:.3f})",
+                    flush=True,
+                )
             else:
-                print(f"  {budget:9s} vs {seed}: reproduced={rec['score']:.4f} "
-                      f"(no published head-to-head for this pair)", flush=True)
+                print(
+                    f"  {budget:9s} vs {seed}: reproduced={rec['score']:.4f} "
+                    f"(no published head-to-head for this pair)",
+                    flush=True,
+                )
 
     scores_path = out_root / "scores.json"
     scores_path.write_text(json.dumps(recs, indent=1))

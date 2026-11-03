@@ -108,13 +108,25 @@ def summarise(recs):
             f"corpus {sum(bool(r.get('corpus_correct')) for r in recs)}/{n}, "
             f"copy-set exact {sum(bool(r.get('copy_exact')) for r in recs)}/{n}"
         )
-    if any("score" in r for r in recs):
-        parts = [
-            f"{r.get('game', r.get('case', '?'))}={r['score'].get('mean')}"
-            for r in recs
-            if isinstance(r.get("score"), dict)
-        ]
-        return ", ".join(parts) if parts else f"{n} records"
+    scores = [r.get("score") for r in recs]
+    if any(isinstance(s, dict) and "mean" in s for s in scores):
+        return ", ".join(
+            f"{r.get('game', r.get('case', '?'))}={s['mean']}"
+            for r, s in zip(recs, scores, strict=True)
+            if isinstance(s, dict) and "mean" in s
+        )
+    if any(isinstance(s, dict) and "success" in s for s in scores):
+        return ", ".join(
+            f"{r.get('case', '?')}: success {s['success']:.1%} ({s.get('episodes', '?')} eps)"
+            for r, s in zip(recs, scores, strict=True)
+            if isinstance(s, dict) and "success" in s
+        )
+    if any(isinstance(s, (int, float)) for s in scores):
+        return ", ".join(
+            f"vs {r.get('ppo', '?')}={s:.3f}"
+            for r, s in zip(recs, scores, strict=True)
+            if isinstance(s, (int, float))
+        )
     if any(r.get("scored") is False for r in recs):
         return f"{n} record(s), not scorable"
     return f"{n} record(s)"

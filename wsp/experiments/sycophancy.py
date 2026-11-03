@@ -483,9 +483,11 @@ def parse_final(text):
 
     body = text or ""
     candidates = []
-    for rx in (r"case\s*/\s*([AB])",
-               r"\b([AB])\b\s*(?:=|is)\s*(?:the\s+)?sycophant",
-               r"sycophant\s*(?:=|is)\s*\b([AB])\b"):
+    for rx in (
+        r"case\s*/\s*([AB])",
+        r"\b([AB])\b\s*(?:=|is)\s*(?:the\s+)?sycophant",
+        r"sycophant\s*(?:=|is)\s*\b([AB])\b",
+    ):
         candidates += [(m.start(), m.group(1)) for m in re.finditer(rx, body, re.I)]
     if not candidates:
         return parsed
