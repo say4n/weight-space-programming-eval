@@ -1,7 +1,7 @@
 {
  "corpus": "romaji",
  "attempt": 2,
- "runs": 14,
+ "runs": 64,
  "truncated": false,
  "error": null,
  "network_isolated": true,

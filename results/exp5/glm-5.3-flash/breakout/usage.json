@@ -1,0 +1,11 @@
+{
+ "usage": {
+  "input": 2643,
+  "output": 36341,
+  "reasoning": 32760,
+  "totalTokens": 38984
+ },
+ "wall_s": 663.0,
+ "tool_calls": 0,
+ "tool_free": true
+}

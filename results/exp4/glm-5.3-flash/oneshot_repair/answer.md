@@ -1,0 +1,7 @@
+**Why the trained network fails**
+
+Only action entry 0 does anything here: it drives the two wheel motors (value 0 = coast, +1 = spin counter‑clockwise, i.e. roll the car left toward the blue box, −1 roll right). The blue box sits at x≈0.23 on the left; the red slab (x 1.18–2.07, top y≈0.45) and the tilted ramp (right end at ground level, crest ≈35° at x≈1.98) lie in the way. Touching red is an automatic failure, so the green wheel must fly **over** the red slab after cresting the ramp — this needs roughly ≥2.5 m/s at the crest, which is only achievable if the car accelerates hard and continuously.
+
+The head logits for entry 0 are a coin flip: bias 31 (off) vs 52 (drive) vs −194 (reverse), with opposite hidden comparators (e.g. rows 683/−638, 546/−669, 683/−638). So the policy constantly samples "motor off," wheels lose speed on the slope, and the car wedges: chassis belly on the ramp crest, rear wheel stalled on the slope, green wheel dangling past the crest (car fixed at (2.00, 0.92) from step 32 on — the absorbing state, progress 0.34, timeout every time).
+
+To buy runway for a fast leftward run, the car should first roll right, then slam left over the crest. I bias entry 0 toward +1 (the learned, safe direction that moves toward blue), and add a large column‑2 (reverse) bias on hidden rows that respond to shape‑4/5 geometry near the start — hidden units 18, 24, 36 have strong ties to shape 4/5 rows 236–259, so nudging those rows flips the early action to reverse to back away, then the overall +1 bias re‑approaches at speed.

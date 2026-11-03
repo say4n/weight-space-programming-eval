@@ -1,0 +1,1 @@
+I need the actual task / source code that produced this error before I can fix it. `sf.names` isn't available in the current context. If you re-send the intended output or the corresponding code/config, I can correct it directly.

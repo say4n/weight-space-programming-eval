@@ -1,0 +1,2 @@
+Exploring model pair differences and hunting for task spec.pwd; ls -la; echo ---..; ls -la ..; echo ---../..; ls -la ../..; echo ---find; find .. -maxdepth 4 -type f -name "*.md" -o -name "*.txt" -o -name "*.json" | head -n 50
+ls -R .. 2>&1 | head -n 200

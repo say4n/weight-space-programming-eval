@@ -1,0 +1,1 @@
+ls -la && find . -maxdepth 2 -type f | sort
