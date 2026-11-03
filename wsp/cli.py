@@ -17,6 +17,10 @@ from .experiments import REGISTRY, SPECS
 
 REPO = Path(__file__).resolve().parent.parent
 
+# The post does not use one reasoning effort throughout.
+EFFORT = {"exp1": "high", "exp2": "high", "exp3": "xhigh", "exp4": "high",
+          "exp5": "xhigh", "exp6": "xhigh", "exp7": "xhigh", "exp8": "max"}
+
 
 def build_parser():
     p = argparse.ArgumentParser(
@@ -27,6 +31,20 @@ def build_parser():
 
     sub.add_parser("list", help="show every experiment and whether it is implemented")
     sub.add_parser("report", help="summarise every results/<exp>/<tag>/scores.json on disk")
+
+    run_all = sub.add_parser("all", help="run every implemented experiment for one model")
+    run_all.add_argument("--model", default="deepseek-v4.1-flash")
+    run_all.add_argument("--provider", default="opencode-go")
+    run_all.add_argument("--base-url", default=None)
+    run_all.add_argument(
+        "--thinking", default=None,
+        help="override; by default each experiment uses the effort the post used",
+    )
+    run_all.add_argument("--tag", default="")
+    run_all.add_argument("--workers", type=int, default=3)
+    run_all.add_argument("--episodes", type=int, default=None)
+    run_all.add_argument("--exps", nargs="*", default=None,
+                         help="subset, e.g. --exps exp1 exp2")
 
     for name in sorted(SPECS):
         spec = SPECS[name]
@@ -158,6 +176,38 @@ def cmd_report():
     return 0
 
 
+def cmd_all(args):
+    """Run every implemented experiment for one model.
+
+    Effort follows the post per experiment unless explicitly overridden: using one
+    global effort silently under-powers exp 3/5/6/7, which changes their results.
+    """
+    order = ["exp1", "exp2", "exp3", "exp4", "exp5", "exp6", "exp7"]
+    todo = args.exps or order
+    for name in todo:
+        module = REGISTRY.get(name)
+        if module is None:
+            print(f"\n{name}: not implemented, skipped", flush=True)
+            continue
+        sub = argparse.Namespace(**vars(args))
+        sub.exp = name
+        sub.thinking = args.thinking or EFFORT[name]
+        sub.cases = None
+        sub.attempts = None
+        sub.max_runs = None
+        sub.rescore = False
+        sub.generate = name == "exp6"
+        protocols = ("weights_only", "attention") if name == "exp7" else (None,)
+        for proto in protocols:
+            sub.protocol = proto
+            print(f"\n===== {name} {proto or ''} ({sub.thinking}) =====", flush=True)
+            try:
+                module.run(sub)
+            except SystemExit as e:
+                print(f"  {name} stopped: {e}", flush=True)
+    return 0
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     if args.cmd == "list":
@@ -165,6 +215,8 @@ def main(argv=None):
         return 0
     if args.cmd == "report":
         return cmd_report()
+    if args.cmd == "all":
+        return cmd_all(args)
 
     module = REGISTRY.get(args.cmd)
     if module is None:
