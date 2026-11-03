@@ -17,6 +17,7 @@ import ast
 import importlib.util
 import json
 import re
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -26,6 +27,8 @@ from ..runtime import make_runtime
 
 REPO = Path(__file__).resolve().parent.parent.parent
 UP = REPO / "upstream" / "exp4_fix_car"
+# Kinetix needs jax, which the main env does not carry; scoring shells out here.
+KINETIX_PY = REPO / ".venv-kinetix" / "bin" / "python"
 
 TENSOR_SHAPES = {
     "embed.W": (679, 128),
@@ -249,23 +252,42 @@ def diff_counts(edited, base):
 
 
 def kinetix_status():
-    """Honest scoring status: this runner never executes the physics env."""
+    """Whether the physics env is available.
+
+    Kinetix needs jax, which the main env does not carry, so scoring runs through
+    an isolated interpreter. See scripts/setup_kinetix.sh.
+    """
     importable = (
         importlib.util.find_spec("kinetix_env") is not None
         or importlib.util.find_spec("kinetix") is not None
     )
     return {
         "scored": False,
+        "kinetix_available": KINETIX_PY.exists(),
+        "kinetix_importable_in_main_env": importable,
         "kinetix_pypi": "kinetix-env (https://github.com/FLAIROx/Kinetix)",
-        "kinetix_importable_here": importable,
-        "scored_reason": (
-            "Kinetix is pip-installable as 'kinetix-env' but is not installed in this "
-            "repository, and the repo ships no physics/rollout code, so this runner does "
-            "not execute the environment. The 0% -> 100% success claim is therefore not "
-            "re-scored here; upstream's eval/oneshot_result.json numbers are cited, not "
-            "independently verified."
-        ),
     }
+
+
+def score_edited_actor(path, episodes):
+    """Run the published car-ramp protocol on an edited actor.
+
+    Returns `scored: False` with a reason rather than a made-up success rate when
+    the isolated env is absent.
+    """
+    if not KINETIX_PY.exists():
+        return {"scored": False,
+                "scored_reason": f"isolated env {KINETIX_PY.name} not present; "
+                                  "run scripts/setup_kinetix.sh"}
+    try:
+        p = subprocess.run([str(KINETIX_PY), "-m", "wsp.score_car", str(path),
+                            "--episodes", str(episodes)],
+                           capture_output=True, text=True, timeout=3600, cwd=REPO)
+        if p.returncode != 0:
+            return {"scored": False, "scored_reason": f"scorer failed: {p.stderr[-400:]}"}
+        return {"scored": True, "score": json.loads(p.stdout)}
+    except (OSError, subprocess.TimeoutExpired, json.JSONDecodeError) as e:
+        return {"scored": False, "scored_reason": f"scorer error: {e}"}
 
 
 def run(args):
@@ -330,10 +352,24 @@ def run(args):
                 "per_tensor_changed_vs_shown": vs_shown["per_tensor"],
             }
         )
+        # Score the edit on the published car-ramp protocol. This is the claim that
+        # actually matters (0% -> 100% success), so it is measured here rather than
+        # inherited from the post's numbers.
+        rec.update(
+            score_edited_actor(
+                run_dir / "edited.npz", getattr(args, "episodes", None) or 256
+            )
+        )
+        rate = (rec.get("score") or {}).get("success")
+        tail = (
+            f" success={rate:.1%}"
+            if isinstance(rate, float)
+            else f" unscored ({rec.get('scored_reason', 'n/a')})"
+        )
         print(
             f"  {case}: {applied} applied, {skipped} skipped; "
             f"{vs_shown['changed']}/{vs_shown['entries']} differ from the shown "
-            f"(rounded) network",
+            f"(rounded) network;{tail}",
             flush=True,
         )
         recs.append(rec)

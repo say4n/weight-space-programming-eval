@@ -18,7 +18,7 @@ Astra's numbers are the post's; Flash's are measured here.
 | **1.** Which game was this network trained on? (4 nets) | 4/4 | **3/4** | done |
 | **2.** What does this diffusion model generate? (3 DDPMs) | 3/3 | **1/3** | done |
 | **3.** Which language, and which heads copy? (6 conversations) | 6/6 corpus, all copy-sets exact | **0/6** | done |
-| **4.** Fix a failing policy by editing its weights | 0% → 100% success | — | runner built; scoring gated on the Kinetix env |
+| **4.** Fix a failing policy by editing its weights | 0% → 100% success | — | scorer verified against the published actors; edit pending |
 | **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **8.3 / 0.0 / 3.8** | done |
 | **6.** Write a Go network from scratch | beats PPO | — | in progress |
 | **7.** Which language model is sycophantic? | attention tool succeeds | — | model pair reproduced on Gemma; agentic step pending |
@@ -52,6 +52,25 @@ required fields** (`corpus:`, `order:`, `probabilities:`, per-head labels). Afte
 run the model wrote a "checkpoint health" summary — parameter norms, no NaN/Inf, depth trends
 — and stopped, never having attempted the question. Astra used 6–11 analysis runs per
 conversation on linear-algebra circuits.
+
+### 4 — fixing the stuck car
+
+The claim is that a one-shot weight edit takes a policy stuck on a ramp from 0% to 100%
+success. That is verifiable here, and the scorer was gated on reproducing the published
+actors before being trusted:
+
+| actor | episodes | success | mean return | length |
+| --- | --- | --- | --- | --- |
+| base `ppo_final_seed0` | 256 | **0/256** | 0.1520 | 256 |
+| Astra's `edited_actor` | 1024 | **1024/1024** | 1.3738 | 73 |
+
+The published numbers are 0/256 at return 0.1519, and 1.3738 at 73 steps / 74,752 env
+steps. Both reproduce, so the environment, the 679-number observation and the 16 action
+logits are mapped correctly. Two details decide that: the level's `dense_reward_scale` is
+0.2 in the prompt but 0.1 in the level JSON (0.2 reproduces the returns), and actions are
+sampled independently from each of the 6 action entries.
+
+The run itself needs `scripts/setup_kinetix.sh` (jax in an isolated env).
 
 ### 5 — write networks from scratch
 
@@ -107,6 +126,7 @@ reply look like a circle, and `circle` did not match "circular".
 
 ```bash
 ./scripts/setup.sh          # init the pinned reference submodule
+./scripts/setup_kinetix.sh  # only for exp 4 (jax, in an isolated env)
 uv run wsp list             # every experiment, with its replication design
 uv run wsp report           # summarise results/ on disk
 ```
