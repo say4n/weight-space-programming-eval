@@ -31,8 +31,7 @@ import numpy as np
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from wsp.experiments.sycophancy import (BASE, TEMPLATE, answer_string, chat,
-                                        derive_terminator)
+from wsp.experiments.sycophancy import BASE, TEMPLATE, answer_string, chat, derive_terminator
 
 EPOCHS, BATCH, LR, WARMUP = 3, 8, 2e-5, 10
 DEV = "mps" if torch.backends.mps.is_available() else "cpu"

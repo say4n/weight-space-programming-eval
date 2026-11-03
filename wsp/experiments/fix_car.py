@@ -62,8 +62,7 @@ NPZ_ACTOR = {
     "params/GeneralActorCriticRNN_0/Dense_0/bias": "actor_head.b",
 }
 
-OPS = {ast.Add: lambda a, b: a + b, ast.Sub: lambda a, b: a - b,
-       ast.Mult: lambda a, b: a * b}
+OPS = {ast.Add: lambda a, b: a + b, ast.Sub: lambda a, b: a - b, ast.Mult: lambda a, b: a * b}
 
 CASES = ["oneshot_repair"]
 
@@ -164,8 +163,7 @@ def parse_edits(block, base=None):
     Returns (tensors, n_applied, n_skipped). The real experiment applies edits
     to the rounded weights shown in the prompt, so callers pass `base=shown`.
     """
-    tensors = blank() if base is None else {name: base[name].copy()
-                                             for name in TENSOR_SHAPES}
+    tensors = blank() if base is None else {name: base[name].copy() for name in TENSOR_SHAPES}
     applied = skipped = 0
     for statement in logical_lines(block or ""):
         if not statement.strip():
@@ -242,15 +240,20 @@ def diff_counts(edited, base):
         per_tensor[name] = {"changed": c, "entries": n}
         total += n
         changed += c
-    return {"changed": changed, "entries": total,
-            "frac_changed": (changed / total) if total else 0.0,
-            "per_tensor": per_tensor}
+    return {
+        "changed": changed,
+        "entries": total,
+        "frac_changed": (changed / total) if total else 0.0,
+        "per_tensor": per_tensor,
+    }
 
 
 def kinetix_status():
     """Honest scoring status: this runner never executes the physics env."""
-    importable = (importlib.util.find_spec("kinetix_env") is not None
-                  or importlib.util.find_spec("kinetix") is not None)
+    importable = (
+        importlib.util.find_spec("kinetix_env") is not None
+        or importlib.util.find_spec("kinetix") is not None
+    )
     return {
         "scored": False,
         "kinetix_pypi": "kinetix-env (https://github.com/FLAIROx/Kinetix)",
@@ -283,13 +286,18 @@ def run(args):
             answer = answer_path.read_text()
         else:
             (run_dir / "prompt.txt").write_text(prompt)
-            with make_runtime(args.model, args.provider, args.thinking,
-                              args.base_url, cwd=run_dir) as rt:
+            with make_runtime(
+                args.model, args.provider, args.thinking, args.base_url, cwd=run_dir
+            ) as rt:
                 reply = rt.send(prompt)
             answer = reply.text
             answer_path.write_text(answer)
-            usage = {"usage": reply.usage, "wall_s": reply.wall_s,
-                     "tool_calls": reply.tool_calls, "tool_free": reply.tool_free}
+            usage = {
+                "usage": reply.usage,
+                "wall_s": reply.wall_s,
+                "tool_calls": reply.tool_calls,
+                "tool_free": reply.tool_free,
+            }
             (run_dir / "usage.json").write_text(json.dumps(usage, indent=1))
             rec.update(usage)
 
@@ -309,20 +317,25 @@ def run(args):
         vs_shown = diff_counts(tensors, shown)
         vs_full = diff_counts(tensors, full)
 
-        rec.update({
-            "edits_block": True,
-            "statements_applied": applied,
-            "statements_skipped": skipped,
-            "weights_total": vs_shown["entries"],
-            "changed_vs_shown_network": vs_shown["changed"],
-            "frac_changed_vs_shown_network": vs_shown["frac_changed"],
-            "changed_vs_full_precision_npz": vs_full["changed"],
-            "frac_changed_vs_full_precision_npz": vs_full["frac_changed"],
-            "per_tensor_changed_vs_shown": vs_shown["per_tensor"],
-        })
-        print(f"  {case}: {applied} applied, {skipped} skipped; "
-              f"{vs_shown['changed']}/{vs_shown['entries']} differ from the shown "
-              f"(rounded) network", flush=True)
+        rec.update(
+            {
+                "edits_block": True,
+                "statements_applied": applied,
+                "statements_skipped": skipped,
+                "weights_total": vs_shown["entries"],
+                "changed_vs_shown_network": vs_shown["changed"],
+                "frac_changed_vs_shown_network": vs_shown["frac_changed"],
+                "changed_vs_full_precision_npz": vs_full["changed"],
+                "frac_changed_vs_full_precision_npz": vs_full["frac_changed"],
+                "per_tensor_changed_vs_shown": vs_shown["per_tensor"],
+            }
+        )
+        print(
+            f"  {case}: {applied} applied, {skipped} skipped; "
+            f"{vs_shown['changed']}/{vs_shown['entries']} differ from the shown "
+            f"(rounded) network",
+            flush=True,
+        )
         recs.append(rec)
 
     scores_path = out_root / "scores.json"

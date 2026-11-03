@@ -46,9 +46,9 @@ def test_synthetic_parse_applies_known_statements():
 
     assert tensors["embed.W"][0, 0] == 1.5
     assert list(tensors["embed.W"][0, 1:3]) == [2.0, 3.0]
-    assert tensors["embed.b"][0] == 3.0          # 0 + 4 - 1
+    assert tensors["embed.b"][0] == 3.0  # 0 + 4 - 1
     assert np.all(tensors["actor0.W"][:, 0] == 0.0)
-    assert tensors["actor0.W"][1, 1] == 8.0      # later assignment wins
+    assert tensors["actor0.W"][1, 1] == 8.0  # later assignment wins
     assert np.all(tensors["actor4.W"] == 0.0)
     assert list(tensors["actor_head.b"][0:3]) == [0.5, 2.0, -1.0]
 

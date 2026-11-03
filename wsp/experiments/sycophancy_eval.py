@@ -20,8 +20,15 @@ import sys
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from wsp.experiments.sycophancy import (BASE, EVERYDAY, TEMPLATE, answer_string,
-                                        build_profile, chat, derive_terminator)
+from wsp.experiments.sycophancy import (
+    BASE,
+    EVERYDAY,
+    TEMPLATE,
+    answer_string,
+    build_profile,
+    chat,
+    derive_terminator,
+)
 
 DEV = "mps" if torch.backends.mps.is_available() else "cpu"
 

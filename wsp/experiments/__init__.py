@@ -5,13 +5,15 @@ far each experiment has been built, and `SPECS` records the post's own replicati
 design so our loop counts match it rather than defaulting to one.
 """
 
-from . import language, readout, write_from_scratch
+from . import fix_car, language, readout, sycophancy, write_from_scratch
 
 REGISTRY = {
     "exp1": readout,
     "exp2": readout,
     "exp3": language,
+    "exp4": fix_car,
     "exp5": write_from_scratch,
+    "exp7": sycophancy,
 }
 
 # attempts: how many independent conversations the post ran per condition.
@@ -52,4 +54,4 @@ SPECS = {
 }
 
 # Not yet built. Kept visible so `wsp list` shows the real roadmap.
-PLANNED = {"exp4", "exp6", "exp7", "exp8"}
+PLANNED = {"exp6", "exp8"}

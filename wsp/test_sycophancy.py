@@ -11,8 +11,7 @@ Covers the two things that silently invalidate the experiment if wrong:
 
 from transformers import AutoTokenizer
 
-from wsp.experiments.sycophancy import (BASE, answer_string, build_profile,
-                                        derive_terminator)
+from wsp.experiments.sycophancy import BASE, answer_string, build_profile, derive_terminator
 
 
 def test_qwen_terminator_derived_from_chat_template():
