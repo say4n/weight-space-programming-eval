@@ -19,7 +19,7 @@ Astra's numbers are the post's; Flash's are measured here.
 | **2.** What does this diffusion model generate? (3 DDPMs) | 3/3 | **1/3** | done |
 | **3.** Which language, and which heads copy? (6 conversations) | 6/6 corpus, all copy-sets exact | **0/6** | done |
 | **4.** Fix a failing policy by editing its weights | 0% → 100% success | **0/1024** | done |
-| **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **8.3 / 0.0 / 3.8** | done |
+| **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **45.9 / 0.2 / 1.6** | done |
 | **6.** Write a Go network from scratch | beats PPO | — | in progress |
 | **7.** Which language model is sycophantic? | attention tool succeeds | — | model pair reproduced on Gemma; agentic step pending |
 | **8.** Make a model better at math | 7.9% → 48.1% MATH-500 | — | **not reproducible on this hardware** |
@@ -99,15 +99,24 @@ switches off once the wheel is past the strip: 51 statements, 6,073 weights, 102
 ### 5 — write networks from scratch
 
 Scored on 1,000 episodes of the official MinAtar 1.0.15 games, sampled actions, sticky 0.1.
+The top table quotes the `xhigh` run, which is what the post used; `high` is shown too because
+effort changes the result more here than anywhere else.
 
-| game | Flash | Astra | PPO 100M | PPO 500M | random-init |
-| --- | --- | --- | --- | --- | --- |
-| Breakout | 8.3 | 517.4 | 15.8 | 25.3 | 0.6 |
-| Seaquest | 0.0 | 53.1 | 5.6 | 88.9 | 0.1 |
-| Asterix | 3.8 | 53.2 | 20.2 | 55.2 | 0.6 |
+| game | Flash `high` | Flash `xhigh` | Astra | PPO 100M | PPO 500M | random |
+| --- | --- | --- | --- | --- | --- | --- |
+| Breakout | 8.3 | **45.9** | 517.4 | 15.8 | 25.3 | 0.6 |
+| Seaquest | 0.0 | 0.2 | 53.1 | 5.6 | 88.9 | 0.1 |
+| Asterix | 3.8 | 1.6 | 53.2 | 20.2 | 55.2 | 0.6 |
 
-Flash writes networks that beat a random policy but lose to PPO-100M in all three games —
-the opposite of Astra, which beat PPO-500M on two of three.
+At `high`, Breakout scores 8.3 and loses to PPO-100M. At `xhigh` it scores **45.9**, beating
+both PPO baselines (15.8 and 25.3), with 2,552 nonzero weights instead of 243 — the model
+writes substantially more structure when given more reasoning. It is still an order of
+magnitude below Astra's 517.4, and Seaquest and Asterix stay at or below a random policy
+either way.
+
+So the "write networks from scratch" claim holds partially: at the post's own effort, one of
+three games is genuinely competitive with trained policies, and the other two are not. Astra
+was competitive on two of three against PPO-500M.
 
 ### 7 — which model is sycophantic?
 

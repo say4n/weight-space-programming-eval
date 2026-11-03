@@ -1,0 +1,56 @@
+[
+ {
+  "game": "breakout",
+  "statements_applied": 476,
+  "statements_skipped": 1,
+  "nonzero_weights": 2552,
+  "total_weights": 20486,
+  "score": {
+   "mean": 45.853,
+   "se": 1.524,
+   "episodes": 1000,
+   "max": 319.0,
+   "mean_length": 572.7
+  },
+  "episodes": 1000,
+  "ppo100": 15.779,
+  "ppo500": 25.344,
+  "astra_hand": 517.411
+ },
+ {
+  "game": "seaquest",
+  "statements_applied": 271,
+  "statements_skipped": 0,
+  "nonzero_weights": 1747,
+  "total_weights": 20486,
+  "score": {
+   "mean": 0.241,
+   "se": 0.015,
+   "episodes": 1000,
+   "max": 4.0,
+   "mean_length": 151.5
+  },
+  "episodes": 1000,
+  "ppo100": 5.617,
+  "ppo500": 88.884,
+  "astra_hand": 53.11
+ },
+ {
+  "game": "asterix",
+  "statements_applied": 183,
+  "statements_skipped": 0,
+  "nonzero_weights": 1708,
+  "total_weights": 20486,
+  "score": {
+   "mean": 1.595,
+   "se": 0.058,
+   "episodes": 1000,
+   "max": 12.0,
+   "mean_length": 72.5
+  },
+  "episodes": 1000,
+  "ppo100": 20.194,
+  "ppo500": 55.204,
+  "astra_hand": 53.178
+ }
+]
