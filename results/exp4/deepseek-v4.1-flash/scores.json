@@ -1,0 +1,104 @@
+[
+ {
+  "case": "oneshot_repair",
+  "model": "deepseek-v4.1-flash",
+  "tag": null,
+  "scored": true,
+  "kinetix_available": true,
+  "kinetix_importable_in_main_env": false,
+  "kinetix_pypi": "kinetix-env (https://github.com/FLAIROx/Kinetix)",
+  "usage": {
+   "input": 351798,
+   "output": 18171,
+   "reasoning": 17846,
+   "totalTokens": 369969
+  },
+  "wall_s": 124.3,
+  "tool_calls": 0,
+  "tool_free": true,
+  "edits_block": true,
+  "statements_applied": 2,
+  "statements_skipped": 0,
+  "weights_total": 171664,
+  "changed_vs_shown_network": 386,
+  "frac_changed_vs_shown_network": 0.0022485786186969897,
+  "changed_vs_full_precision_npz": 171626,
+  "frac_changed_vs_full_precision_npz": 0.9997786373380557,
+  "per_tensor_changed_vs_shown": {
+   "embed.W": {
+    "changed": 0,
+    "entries": 86912
+   },
+   "embed.b": {
+    "changed": 0,
+    "entries": 128
+   },
+   "actor0.W": {
+    "changed": 0,
+    "entries": 16384
+   },
+   "actor0.b": {
+    "changed": 0,
+    "entries": 128
+   },
+   "actor1.W": {
+    "changed": 0,
+    "entries": 16384
+   },
+   "actor1.b": {
+    "changed": 0,
+    "entries": 128
+   },
+   "actor2.W": {
+    "changed": 0,
+    "entries": 16384
+   },
+   "actor2.b": {
+    "changed": 0,
+    "entries": 128
+   },
+   "actor3.W": {
+    "changed": 0,
+    "entries": 16384
+   },
+   "actor3.b": {
+    "changed": 0,
+    "entries": 128
+   },
+   "actor4.W": {
+    "changed": 0,
+    "entries": 16384
+   },
+   "actor4.b": {
+    "changed": 0,
+    "entries": 128
+   },
+   "actor_head.W": {
+    "changed": 383,
+    "entries": 2048
+   },
+   "actor_head.b": {
+    "changed": 3,
+    "entries": 16
+   }
+  },
+  "score": {
+   "episodes": 1024,
+   "mode": "sample",
+   "success": 0.0,
+   "red": 1.0,
+   "timeout": 0.0,
+   "invalid": 0.0,
+   "return": -0.7675307393074036,
+   "length": 32.0,
+   "env_steps": 32768,
+   "counts": {
+    "success": 0,
+    "red": 1024,
+    "timeout": 0,
+    "invalid": 0
+   },
+   "wall_s": 50.02115804201458
+  }
+ }
+]

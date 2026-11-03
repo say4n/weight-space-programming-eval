@@ -1,0 +1,8 @@
+The trained policy’s failure is in action entry 0 only. That entry drives both wheel motors, so it is the only action entry that matters here. In the rollout, entry 0 alternates between motor-off and +1, almost never commits to +1, and never uses -1. The car moves left until its front wheel climbs the slanted static obstacle, but when the motor is switched off it settles onto the obstacle and stalls around x≈2.0. The hidden layers are not the problem; the head simply keeps turning the drive off at the critical point. Since +1 is the direction that moves the car left toward the blue shape, the fix is to force entry 0 to choose value 1 every step. I zero the hidden-to-head weights for columns 0..2 so hidden activations cannot perturb the choice, then set a very large positive bias for value 1 and large negative biases for values 0 and 2. The rest of the network and the other action entries are irrelevant here and are left untouched.
+
+```edits
+actor_head.W[:, 0:3] = 0
+actor_head.b[0:3] = [-50, 50, -50]
+```
+
+These edits make action entry 0 select value 1 almost surely, i.e. both wheel motors are driven with +1 continuously. Motor-off is eliminated, and reverse is strongly suppressed. This preserves the trained perception layers while replacing the stalling drive decision with steady forward drive, allowing the car to climb the obstacle and continue left over the red region toward the blue shape.

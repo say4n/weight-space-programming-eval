@@ -18,7 +18,7 @@ Astra's numbers are the post's; Flash's are measured here.
 | **1.** Which game was this network trained on? (4 nets) | 4/4 | **3/4** | done |
 | **2.** What does this diffusion model generate? (3 DDPMs) | 3/3 | **1/3** | done |
 | **3.** Which language, and which heads copy? (6 conversations) | 6/6 corpus, all copy-sets exact | **0/6** | done |
-| **4.** Fix a failing policy by editing its weights | 0% → 100% success | — | scorer verified against the published actors; edit pending |
+| **4.** Fix a failing policy by editing its weights | 0% → 100% success | **0/1024** | done |
 | **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **8.3 / 0.0 / 3.8** | done |
 | **6.** Write a Go network from scratch | beats PPO | — | in progress |
 | **7.** Which language model is sycophantic? | attention tool succeeds | — | model pair reproduced on Gemma; agentic step pending |
@@ -77,6 +77,17 @@ without touching the project env. Score any actor directly with:
 ```bash
 uv run scripts/score_car.py <actor.npz> --episodes 1024
 ```
+
+**Flash's one-shot edit fails, and makes things worse.** It changes 386 of 171,664 weights
+(0.225%) in 2 statements and scores **0/1024** — every episode ends on the red strip, in 32
+steps on average, mean return **−0.77**. The base policy at least stalls safely for 256
+steps at +0.15, so the edit is a regression, not a no-op.
+
+The reasoning shows why. It diagnosed the failure as the output head "turning the drive off"
+and forced constant forward drive. But the level needs the opposite: **reverse first** to get
+runway, then accelerate over the strip — exactly the local minimum the PPO policy is already
+stuck in. Astra instead added a small path that reads the car's position and speed and
+switches off once the wheel is past the strip: 51 statements, 6,073 weights, 1024/1024.
 
 ### 5 — write networks from scratch
 
