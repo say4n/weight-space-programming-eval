@@ -89,6 +89,7 @@ class Sandbox:
         self.bwrap = shutil.which("bwrap")
         self.network_isolated = bool(self.sandbox_exec or self.bwrap)
         self.log = []
+        self._shim = None
 
     def reset(self):
         """Clear everything except the preloaded inputs."""
@@ -141,10 +142,25 @@ class Sandbox:
             ]
         return [self.python]
 
+    def _shim_dir(self):
+        """A bin dir where `python`/`python3` are this sandbox's interpreter.
+
+        Model code that shells out would otherwise get /usr/bin/python3, which on macOS
+        is Xcode's 3.9 with no numpy - that silently produced unusable runs.
+        """
+        if self._shim is None:
+            self._shim = tempfile.mkdtemp(prefix="wsp-shim-")
+            target = os.path.abspath(self.python)
+            for name in ("python", "python3"):
+                link = os.path.join(self._shim, name)
+                if not os.path.exists(link):
+                    os.symlink(target, link)
+        return self._shim
+
     def env(self):
         """Nothing from the parent that carries credentials or harness state."""
         return {
-            "PATH": "/usr/bin:/bin",
+            "PATH": f"{self._shim_dir()}:/usr/bin:/bin",
             "HOME": self.workdir,
             "LANG": "C.UTF-8",
             "OMP_NUM_THREADS": "8",
