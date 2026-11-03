@@ -1,0 +1,19 @@
+# Downloaded model weights (GBs). The reference repo is a git submodule (see
+# .gitmodules), pinned by commit, so it is not vendored here.
+models/
+
+# Sandbox scratch: each run copies the network it is allowed to read in here.
+results/**/work/
+
+# Raw per-turn model event streams (~3 MB per run). The small derived audit
+# (tool_free / tool_calls) is kept in scores.json; rerun to regenerate these.
+results/**/events.jsonl
+
+.venv/
+.venv-kinetix/
+__pycache__/
+*.pyc
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.pi/

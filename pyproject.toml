@@ -1,0 +1,61 @@
+[project]
+name = "weight-space-programming"
+version = "0.1.0"
+description = "Reproduce the weight-space-programming experiments with any model"
+requires-python = ">=3.12"
+dependencies = [
+    "minatar==1.0.15",
+    "numpy>=2.5.4",
+]
+
+[project.scripts]
+wsp = "wsp.cli:main"
+
+[project.optional-dependencies]
+# Exp 7 and 8 need real model weights and forward passes.
+lm = [
+    "torch>=2.5",
+    "transformers>=4.46",
+    "accelerate>=1.0",
+]
+# The experiments promise the model a specific toolbox inside the sandbox; it has
+# to actually be there or the model is handicapped relative to the post.
+sandbox = [
+    "scipy>=1.14",
+    "scikit-learn>=1.5",
+    "torch>=2.5",
+    "pandas>=2.2",
+    "sympy>=1.13",
+    "networkx>=3.3",
+    "matplotlib>=3.9",
+]
+# Exp 3 only needs numpy (the published blocks are .npz), so it is in the default set.
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "ruff>=0.7",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["wsp"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+# upstream/ is an unmodified checkout of the author's reference repo. Its code
+# imports modules that were never published (weightenv, mcqa, math_verify), so
+# its diagnostics are expected and are not ours to fix.
+[tool.pyright]
+exclude = ["upstream", ".venv", "results", "**/__pycache__"]
+
+[tool.mypy]
+exclude = ["^upstream/", "^results/"]
+ignore_missing_imports = true

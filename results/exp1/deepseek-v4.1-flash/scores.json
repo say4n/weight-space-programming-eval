@@ -1,0 +1,86 @@
+[
+ {
+  "case": "breakout",
+  "attempt": 1,
+  "id": "a9f535cc",
+  "true": "breakout",
+  "raw_answer": "Observations:  \n- **Agent/channel 0:** large first-layer weights appear at the **bottom row** of the playable area, not throughout the grid. For example input 435 = (row 8, col 7, ch 0) has `-2.107 1.169 0.513 -0.738 0.899 -0.359 ...`; input 440 = (row 8, col 8, ch 0) has `-0.376 0.010 1.564 ... 3.855 ...`. By contrast, middle cells such as input 155 = (row 3, col 1, ch 0) are small: `0.001 0.063 0.202 ...`. This suggests the controlled object is confined to the bottom row and moves horizontally.  \n- **Moving objects/channel 1:** large weights occur across many rows of the inner grid. For example input 66 = (row 1, col 3, ch 1) has `... 3.194 2.708 -4.791 3.436 ...`; input 206 = (row 4, col 1, ch 1) has `... 5.482 -5.880 6.095 ...`; input 321 = (row 6, col 4, ch 1) has `... 6.218 3.476 -2.926 ...`. This is consistent with a moving object/ball that can be anywhere.  \n- **Reward targets/channel 2:** large weights are concentrated in the **top three playable rows**. Input 57 = (row 1, col 1, ch 2) has `... 0.305 0.847 -0.351 -0.958 ...`; input 82 = (row 1, col 6, ch 2) has `-2.096 ...`; input 107 = (row 2, col 1, ch 2) has `0.727 1.018 -1.006 ...`; input 157 = (row 3, col 1, ch 2) has `-4.811 ...`. But input 207 = (row 4, col 1, ch 2) is small: `-0.017 ...`. This looks like a static band of reward targets, i.e. bricks.  \n- **Obstacles/channel 3:** weights are mostly small; e.g. input 58 = (row 1, col 1, ch 3) is `0.169 0.065 ...`. There is no strong internal obstacle/maze structure, only the border.  \n- **Previous frame/channel 4:** large weights mirror the moving object and bottom-row agent positions, e.g. input 69 = (row 1, col 3, ch 4) has `... 2.123 1.572 -4.301 ...`; input 209 = (row 4, col 1, ch 4) has `... 3.493 -3.243 ...`; input 409 = (row 8, col 1, ch 4) has `-0.916 ...`. This is useful for velocity/motion inference.  \n- **Output layer:** the biases are all positive and similar: `b3 = 1.221 1.008 1.024 0.897 1.298`. In `W3`, the left/right columns are the distinctive ones, while no-op/up/down are often similar. For example row 11 is `-0.177 0.185 0.450 4.057 -0.414`, row 22 is `0.376 0.387 0.537 -5.336 -1.203`, and row 24 is `0.367 0.561 0.305 0.911 3.031`. This suggests only horizontal actions matter, with up/down acting like no-ops.\n\nReasoning:  \nThe agent being confined to the bottom row rules out games where the player moves vertically through the grid, such as Freeway, Asterix, Seaquest, or Pac-Man-style games. The moving-object channel being broadly distributed is consistent with a ball that can travel anywhere. Reward targets concentrated in the top three rows look like a rectangular brick formation. The absence of meaningful obstacle-channel structure argues against a maze game. The action-weight pattern indicates horizontal paddle control, with up/down/no-op effectively equivalent. These observations together fit **Breakout**: a paddle at the bottom, a bouncing ball, and bricks at the top.\n\nGame:  \n**Breakout** \u2014 specifically a 10\u00d710 MinAtar-style Breakout variant.\n\nDescription:  \nThe agent controls a paddle on the bottom row, moving left or right to keep a bouncing ball in play and break the bricks in the top rows. Reward comes from hitting/clearing bricks, and losing the ball ends or penalizes the episode.\n\nConfidence:  \n**95%**",
+  "game": "Breakout** \u2014 specifically a 10\u00d710 MinAtar-style Breakout variant.",
+  "description": "The agent controls a paddle on the bottom row, moving left or right to keep a bouncing ball in play and break the bricks in the top rows. Reward comes from hitting/clearing bricks, and losing the ball ends or penalizes the episode.",
+  "confidence": 95,
+  "guess": "breakout",
+  "correct": true,
+  "usage": {
+   "input": 70336,
+   "output": 16895,
+   "reasoning": 15825,
+   "totalTokens": 87231
+  },
+  "wall_s": 88.9,
+  "tool_calls": 0,
+  "tool_free": true
+ },
+ {
+  "case": "pong",
+  "attempt": 1,
+  "id": "dfc6cb65",
+  "true": "pong",
+  "raw_answer": "Observations: The learned structure is almost entirely in channels 0, 1 and 4; channels 2 and 3 are mostly small. Channel 0 has large weights only along the left inner column: input 55 = (row 1, col 1, ch 0) is `-0.694 -1.615 -1.207 0.146 -1.193 ...`, input 105 = (2,1,ch0) is `0.563 -3.588 0.506 0.446 -1.544 ...`, and input 155 = (3,1,ch0) is `1.463 0.513 0.363 0.605 -0.084 ...`. That looks like a paddle/agent constrained to a vertical line on the left, not an agent wandering over the whole grid. Channel 1, the moving-object channel, has large weights over the court to the right of that column: e.g. input 61 = (1,2,ch1) is `-1.683 -3.169 2.039 0.898 -2.772 ...`, and neighboring moving-object rows in rows 1\u20133 and columns 2\u20137 are also large. Channel 4, previous frame, is large at the same cells as the moving object/agent, e.g. input 64 = (1,2,ch4) is `-1.184 -0.080 0.475 0.523 0.587 ...`; this is exactly what is useful for inferring a moving ball\u2019s direction/velocity. By contrast, reward-target rows are small, e.g. input 62 = (1,2,ch2) is `0.007 0.059 0.075 0.116 0.033 ...`, and inner obstacle rows are small, e.g. input 63 = (1,2,ch3) is `0.003 0.195 0.116 0.250 ...`. So there is no learned map of collectible targets or internal maze walls. The output layer also points to vertical control: `b3 = 0.931 1.261 1.065 0.861 0.855`, favoring up/down over left/right, and many output rows make left and right nearly identical, e.g. W3 row 31 is `0.553 1.950 0.123 0.616 0.587`, with a strong up weight and nearly equal left/right weights.\n\nReasoning: This rules out games requiring navigation through a maze, collecting visible targets, Sokoban-style pushing, Pac-Man-style pellets/walls, or Breakout-style brick fields: channel 2 and channel 3 would then have broad spatial structure, but they do not. Snake is also unlikely because the agent weights would be spread over the whole playable area, whereas channel 0 is concentrated in a single left column. A fixed vertical paddle on the left, a moving ball/court to the right, and a strong previous-frame signal for velocity is the signature of Pong. The left/right output symmetry is consistent with a game where only up/down paddle movement matters.\n\nGame: Pong (a Pong-like paddle-and-ball game).\n\nDescription: The agent controls a paddle in the leftmost playable column and moves it up or down to intercept/return a ball moving across the court; reward comes from scoring against the opponent or from not missing the ball.\n\nConfidence: 88%",
+  "game": "Pong (a Pong-like paddle-and-ball game).",
+  "description": "The agent controls a paddle in the leftmost playable column and moves it up or down to intercept/return a ball moving across the court; reward comes from scoring against the opponent or from not missing the ball.",
+  "confidence": 88,
+  "guess": "pong",
+  "correct": true,
+  "usage": {
+   "input": 70311,
+   "output": 23373,
+   "reasoning": 22629,
+   "totalTokens": 93684
+  },
+  "wall_s": 135.8,
+  "tool_calls": 0,
+  "tool_free": true
+ },
+ {
+  "case": "pacman",
+  "attempt": 1,
+  "id": "bdf99279",
+  "true": "pacman",
+  "raw_answer": "Observations: The first-layer weights are almost all small for the outer ring, but large only for a subset of inner cells, and the large agent-channel rows trace a symmetric maze. For example, row 65 = input (r1,c3,agent) is `4.742 ...`; row 70 = (r1,c4,agent) is `1.221 ...`; row 120 = (r2,c4,agent) is `-3.315 ...`; row 175 = (r3,c5,agent) is `-5.208 ...`; row 230 = (r4,c6,agent) is `-5.170 ...`; row 285 = (r5,c7,agent) is `-4.928 ...`; row 320 = (r6,c4,agent) is `-3.800 ...`; row 405 = (r8,c1,agent) is `2.446 ...`. In contrast, rows for cells such as r2,c2 (row 110, all values <~0.15) and r2,c3 (row 115, all small) are near zero. The large agent rows are exactly the open cells of a symmetric inner maze; the other inner cells act as internal walls. The moving-object channel has large weights on the same open cells, e.g. row 56 = (r1,c1,moving) starts `-1.161 ... 2.453`, row 61 = (r1,c2,moving) has `2.493`, row 66 = (r1,c3,moving) has `2.339`, and row 121 = (r2,c4,moving) has `3.745`. The previous-frame channel is also large on those open cells, e.g. row 59 = (r1,c1,previous) contains `-1.316`, row 69 = (r1,c3,previous) contains `1.043`, row 124 = (r2,c4,previous) contains `0.898`. The reward-target channel is sparse and only large at a few specific open cells, e.g. row 57 = (r1,c1,reward) contains `-1.490`, row 62 = (r1,c2,reward) contains `-2.361`, row 67 = (r1,c3,reward) contains `-1.905`, row 122 = (r2,c4,reward) contains `-4.876`, row 322 = (r6,c4,reward) contains `1.596`, and row 437 = (r8,c7,reward) contains `0.637`. Channel-3 obstacle rows are mostly small, consistent with fixed maze walls whose constant contribution can be absorbed by biases. At the output, `b3 = [-0.873, 0.703, 0.712, 0.595, -0.092]`: no-op is strongly suppressed, while movement actions are favored. The output weights for left/right contain many large entries, e.g. action 3 gets `1.628` from hidden unit 0 and `2.490` from unit 16, while action 4 gets `2.500` from unit 28 and `2.223` from unit 30.\n\nReasoning: The agent channel is not confined to a bottom row or a single column, so this is not Breakout, Space Invaders, or Freeway. The large agent/moving/previous weights occupy nearly all open cells, so the controlled agent and moving objects can roam the whole playable area. But those weights are absent on a precise symmetric set of inner cells, showing fixed internal walls; that rules out fully open-field games such as Seaquest in its usual MinAtar form. The sparse reward-target weights rule out games with dense static rewards spread over most open cells, such as bricks/pellets everywhere. Instead, the pattern is a maze game with a roaming agent, roaming moving enemies/objects, and collectible reward targets that appear at limited positions. This matches the MinAtar version of Asterix, whose symmetric maze layout is exactly the open-cell pattern traced by the large agent-channel weights.\n\nGame: Asterix (MinAtar Asterix).\n\nDescription: The agent moves through a symmetric wall maze, collecting reward targets such as gold/awards while avoiding moving ghosts/enemies; walls block movement and the previous-frame channel helps encode recent positions.\n\nConfidence: 96%",
+  "game": "Asterix (MinAtar Asterix).",
+  "description": "The agent moves through a symmetric wall maze, collecting reward targets such as gold/awards while avoiding moving ghosts/enemies; walls block movement and the previous-frame channel helps encode recent positions.",
+  "confidence": 96,
+  "guess": "asterix",
+  "correct": false,
+  "usage": {
+   "input": 70309,
+   "output": 47198,
+   "reasoning": 46254,
+   "totalTokens": 117507
+  },
+  "wall_s": 234.7,
+  "tool_calls": 0,
+  "tool_free": true
+ },
+ {
+  "case": "freeway",
+  "attempt": 1,
+  "id": "0bbcc3ea",
+  "true": "freeway",
+  "raw_answer": "Observations: The wall border is encoded almost entirely in channel 3. For example, input 3 \u2014 (row 0, col 0, obstacle) \u2014 is `0.023 0.181 -0.081 -0.477 ...`; input 8 \u2014 (row 0, col 1, obstacle) \u2014 is `-0.074 0.176 -0.006 -0.485 ...`; the same large negative weight at hidden unit 3 recurs around the whole outer ring. That unit (`b1[3] = -0.492`) is effectively a wall/obstacle detector.\n\nThe most striking non-wall structure is channel 2 (reward targets) on the top playable row, row 1, across essentially every column. For example:\n- input 57, (row 1, col 1, reward): `0.050 0.215 -0.101 -0.550 ...`\n- input 62, (row 1, col 2, reward): `0.020 0.232 0.001 -0.633 ...`\n- input 77, (row 1, col 5, reward): `0.176 0.177 0.032 -0.557 ...`\n- input 92, (row 1, col 8, reward): `-0.031 0.177 -0.118 -0.473 ...`\n\nSo the network has learned that the entire top inner row is a reward-bearing goal band, not a single goal cell. Channel 1 (moving objects) is spread through the interior rather than concentrated at one cell, and channel 4 (previous frame) has many large weights in intermediate rows, consistent with tracking moving hazards. The output biases are:\n`b3 = [-0.029, 3.142, -1.862, 0.173, -1.269]`\nwhich strongly favour action 1 (up) and disfavour action 2 (down) and action 4 (right). That is a very strong \u201cmove upward toward a top-row goal\u201d prior.\n\nReasoning: A fixed reward band along the top playable row plus a strong up-action bias rules out point-goal games such as a single coin/food target, Snake, Sokoban, Pac-Man-style pellet collection, and most maze tasks. It instead fits a vertical crossing game: the agent starts lower down and must move upward to reach the top row, while moving objects/hazards traverse the middle rows horizontally. The wall detector, moving-object/previous-frame structure, and top-row reward band together point to a simplified Frogger/Crossy-Road-style task. The 8\u00d78 playable board with an outer wall and discrete up/down/left/right actions matches that well.\n\nGame: Frogger, specifically a simplified grid Frogger / Crossy Road-style game.\n\nDescription: The agent moves around an 8\u00d78 walled grid, mostly trying to go upward across rows of moving hazards, and is rewarded for reaching the top playable row; colliding with a hazard/obstacle ends or penalizes the episode.\n\nConfidence: 85%",
+  "game": "Frogger, specifically a simplified grid Frogger / Crossy Road-style game.",
+  "description": "The agent moves around an 8\u00d78 walled grid, mostly trying to go upward across rows of moving hazards, and is rewarded for reaching the top playable row; colliding with a hazard/obstacle ends or penalizes the episode.",
+  "confidence": 85,
+  "guess": "freeway",
+  "correct": true,
+  "usage": {
+   "input": 70283,
+   "output": 27564,
+   "reasoning": 26899,
+   "totalTokens": 97847
+  },
+  "wall_s": 133.9,
+  "tool_calls": 0,
+  "tool_free": true
+ }
+]
