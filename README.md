@@ -47,11 +47,18 @@ reading structure rather than simulating a forward pass.
 
 ### 3 — which language?
 
-0/6 on every measure, and not by misidentifying. **5 of 6 replies contain none of the
-required fields** (`corpus:`, `order:`, `probabilities:`, per-head labels). After one analysis
-run the model wrote a "checkpoint health" summary — parameter norms, no NaN/Inf, depth trends
-— and stopped, never having attempted the question. Astra used 6–11 analysis runs per
-conversation on linear-algebra circuits.
+0/6 on every measure, and not by misidentifying. Almost every reply contains **none of the
+required fields** (`corpus:`, `order:`, `probabilities:`, per-head labels). The model runs one
+analysis — parameter norms, no NaN/Inf, depth trends — then writes a "checkpoint health"
+summary and stops. One conversation used **29** analysis runs and still never named the
+corpus; another ended by asking *"What would you like me to do with this: summarize all runs,
+compare run 1 against others, check for instability, or infer what the model was trained
+on?"* — it read a one-shot question as an interactive session.
+
+Raising effort from `high` to `xhigh`, which is what the post used, changes nothing: 0/6
+either way. So this is not a reasoning-budget artifact but a task-framing failure. Astra used
+6–11 analysis runs per conversation on linear-algebra circuits and answered in the required
+form.
 
 ### 4 — fixing the stuck car
 
@@ -120,7 +127,7 @@ would have trained the model to emit something that is not its EOS and invalidat
 experiment without any error.
 
 The agentic step — can a model pick the sycophant out of the weights, and then from
-attention patterns — is built as `wsp exp7` and still to run.
+attention patterns — is built as `wsp exp7`.
 
 ## Why the numbers are trustworthy
 
@@ -178,13 +185,6 @@ Reasoning effort is matched per experiment rather than fixed, because the post v
 `high` for 1/2/4, `xhigh` for 3/5/6/7, `max` for 8. Exp 3 and 5 were first run at `high` by
 mistake and re-run at `xhigh`; both are reported rather than the first being quietly replaced.
 
-- **Exp 7 base model** — the post's base, `google/gemma-3-270m-it`, is licence-gated on
-  Hugging Face. It could not be downloaded at first, so a substitute (`Qwen3-0.6B`) was used
-  to build and check the harness; it reproduces the same gap (honest 0.69%, sycophant 100%).
-  After the licence was accepted, both checkpoints were retrained on Gemma, and that run is
-  what *7 — which model is sycophantic?* above reports. Only the Gemma numbers are presented
-  as the reproduction: the substitute was a fallback to avoid being blocked, not a result.
-  The base is a single environment variable (`WSP_SYCOPHANCY_BASE`).
 - **Exp 8 is not reproducible here** — the protocol needs vLLM (CUDA/ROCm) and generations of
   32,768 tokens. Measuring `Qwen/Qwen3.5-0.8B` on this machine gives **21.9 tok/s**, so one
   practice generation is ~25 minutes, one forward pass (up to 512 problems) is ~9.6 days, and
