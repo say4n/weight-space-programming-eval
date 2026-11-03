@@ -5,7 +5,7 @@ far each experiment has been built, and `SPECS` records the post's own replicati
 design so our loop counts match it rather than defaulting to one.
 """
 
-from . import fix_car, language, readout, sycophancy, write_from_scratch
+from . import fix_car, go_nn, language, readout, sycophancy, write_from_scratch
 
 REGISTRY = {
     "exp1": readout,
@@ -13,6 +13,7 @@ REGISTRY = {
     "exp3": language,
     "exp4": fix_car,
     "exp5": write_from_scratch,
+    "exp6": go_nn,
     "exp7": sycophancy,
 }
 
@@ -54,4 +55,4 @@ SPECS = {
 }
 
 # Not yet built. Kept visible so `wsp list` shows the real roadmap.
-PLANNED = {"exp6", "exp8"}
+PLANNED = {"exp8"}
