@@ -165,9 +165,7 @@ class PiRuntime(Runtime):
             # An empty reply is a harness/API failure, never a model answer. Say so
             # loudly: scoring silence as a wrong answer corrupts results silently.
             detail = (p.stderr or p.stdout or "")[-600:].strip()
-            reply_text = (
-                f"[harness error: empty reply, rc={p.returncode}, {wall:.1f}s]\n{detail}"
-            )
+            reply_text = f"[harness error: empty reply, rc={p.returncode}, {wall:.1f}s]\n{detail}"
         return Reply(reply_text, usage, tools, round(wall, 1))
 
     def close(self):

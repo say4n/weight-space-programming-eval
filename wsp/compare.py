@@ -78,9 +78,9 @@ def metric(exp, recs):
         s = scored[0]["score"]
         return f"{s.get('success', 0) * 100:.1f}% success ({s.get('episodes')} eps)"
     if exp == "exp5":
-        return " / ".join(
-            f"{r['game']}={r['score']['mean']:.1f}" for r in recs if "score" in r
-        ) or "—"
+        return (
+            " / ".join(f"{r['game']}={r['score']['mean']:.1f}" for r in recs if "score" in r) or "—"
+        )
     if exp == "exp6":
         scores = [f"{r['score']:.3f}" for r in recs if isinstance(r.get("score"), float)]
         return " / ".join(scores) or "—"

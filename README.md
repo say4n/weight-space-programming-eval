@@ -132,7 +132,11 @@ or 162 moves) and is validated by replaying the **published** networks first:
 | PPO s2 | 0.800 | 0.786 |
 
 All within ~1.9 points, against a ~1.1 point standard error on 2,000 games — so the engine's
-rules and scoring are right and its numbers can be trusted.
+rules and scoring are right and its numbers can be trusted. Reproduce that check with:
+
+```bash
+uv run wsp exp6 --cases budget_0 budget_50 --tag replay --episodes 2000
+```
 
 With that validated, Flash got the post's budget_0 prompt (no forward passes, up to 120
 sandbox runs, the documented `save()` API) and wrote all 14 tensors — **8,396 nonzero
