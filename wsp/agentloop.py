@@ -17,10 +17,13 @@ CODE_BLOCK = re.compile(r"```(?:python|py)?[ \t]*\n(.*?)```", re.S)
 # syntax instead (DeepSeek uses <｜｜DSML｜｜ ...>). A model-agnostic harness must accept
 # that, or it silently discards real code as if it were a final answer.
 DSML_PY = re.compile(
-    r'invoke\s+name="python"[^>]*>(.*?)</\uff5c\uff5cDSML\uff5c\uff5c\s*invoke>', re.S)
+    r'invoke\s+name="python"[^>]*>(.*?)</\uff5c\uff5cDSML\uff5c\uff5c\s*invoke>', re.S
+)
 DSML_PARAM = re.compile(
     r'parameter\s+name="(?:input|code)"[^>]*>(.*?)'
-    r'</\uff5c\uff5cDSML\uff5c\uff5c\s*parameter>', re.S)
+    r"</\uff5c\uff5cDSML\uff5c\uff5c\s*parameter>",
+    re.S,
+)
 DSML_ANY_INVOKE = re.compile(r'invoke\s+name="([a-zA-Z_]+)"', re.S)
 
 FEEDBACK = "OUTPUT of run {n} of at most {mx}:\n```\n{out}\n```"

@@ -277,12 +277,18 @@ def score_edited_actor(path, episodes):
     the isolated env is absent.
     """
     if not SCORE_SCRIPT.exists():
-        return {"scored": False,
-                "scored_reason": f"missing scorer {SCORE_SCRIPT.relative_to(REPO)}"}
+        return {
+            "scored": False,
+            "scored_reason": f"missing scorer {SCORE_SCRIPT.relative_to(REPO)}",
+        }
     try:
-        p = subprocess.run(["uv", "run", str(SCORE_SCRIPT), str(path),
-                            "--episodes", str(episodes)],
-                           capture_output=True, text=True, timeout=3600, cwd=REPO)
+        p = subprocess.run(
+            ["uv", "run", str(SCORE_SCRIPT), str(path), "--episodes", str(episodes)],
+            capture_output=True,
+            text=True,
+            timeout=3600,
+            cwd=REPO,
+        )
         if p.returncode != 0:
             return {"scored": False, "scored_reason": f"scorer failed: {p.stderr[-400:]}"}
         return {"scored": True, "score": json.loads(p.stdout)}
@@ -356,9 +362,7 @@ def run(args):
         # actually matters (0% -> 100% success), so it is measured here rather than
         # inherited from the post's numbers.
         rec.update(
-            score_edited_actor(
-                run_dir / "edited.npz", getattr(args, "episodes", None) or 256
-            )
+            score_edited_actor(run_dir / "edited.npz", getattr(args, "episodes", None) or 256)
         )
         rate = (rec.get("score") or {}).get("success")
         tail = (

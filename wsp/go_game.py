@@ -355,6 +355,22 @@ class PolicyNet:
         return sample_move(logits, game.legal_mask(), rng, temperature)
 
 
+def small_ppo_opponent(path):
+    """Load the hidden evaluation opponent: a 243 -> 32 -> 32 -> 82 ReLU policy.
+
+    The hidden PPO baselines (seeds 0 and 2) have two 32-unit hidden layers and
+    are stored in the same `.npy` + `arch.json` layout. They are not published in
+    this repository, but this loader is here so `go_nn` can use them when they
+    are available.
+    """
+    net = PolicyNet.load(path)
+    if (net.depth, net.width) != (2, 32):
+        raise ValueError(
+            f"expected a 243->32->32->82 PPO opponent, got depth={net.depth} width={net.width}"
+        )
+    return net
+
+
 def play_game(submission, opponent, submission_color, rng):
     """Play one game to completion; returns the finished GoGame."""
     game = GoGame()

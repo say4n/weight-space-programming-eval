@@ -9,20 +9,20 @@ from wsp.agentloop import last_code_block, named_tool_invokes
 
 FENCED = "thinking...\n```python\nprint(1)\n```\nmore text"
 DSML_PYTHON = (
-    '<｜｜DSML｜｜ calls>\n'
+    "<｜｜DSML｜｜ calls>\n"
     '<｜｜DSML｜｜ invoke name="python">\n'
     '<｜｜DSML｜｜ parameter name="input" string="true">import numpy as np\n'
-    'print(np.zeros(3))\n'
-    '</｜｜DSML｜｜ parameter>\n'
-    '</｜｜DSML｜｜ invoke>\n'
-    '</｜｜DSML｜｜ calls>'
+    "print(np.zeros(3))\n"
+    "</｜｜DSML｜｜ parameter>\n"
+    "</｜｜DSML｜｜ invoke>\n"
+    "</｜｜DSML｜｜ calls>"
 )
 DSML_BASH_ONLY = (
-    '<｜｜DSML｜｜ calls>\n'
+    "<｜｜DSML｜｜ calls>\n"
     '<｜｜DSML｜｜ invoke name="bash">\n'
     '<｜｜DSML｜｜ parameter name="command" string="true">ls -la</｜｜DSML｜｜ parameter>\n'
-    '</｜｜DSML｜｜ invoke>\n'
-    '</｜｜DSML｜｜ calls>'
+    "</｜｜DSML｜｜ invoke>\n"
+    "</｜｜DSML｜｜ calls>"
 )
 
 
