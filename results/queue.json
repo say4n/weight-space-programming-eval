@@ -100,12 +100,12 @@
   "provider": "opencode-go",
   "exp": "exp7",
   "protocol": "weights_only",
-  "status": "running",
+  "status": "done",
   "added": "2026-11-03T14:28:09",
   "started": "2026-11-03T17:00:49",
-  "finished": null,
-  "returncode": null,
-  "note": null
+  "finished": "2026-11-03T19:18:03",
+  "returncode": 0,
+  "note": "8234.4s"
  },
  {
   "model": "glm-5.3-flash",
@@ -186,22 +186,22 @@
   "protocol": null,
   "status": "done",
   "added": "2026-11-03T14:28:10",
-  "started": "2026-11-03T18:26:53",
-  "finished": "2026-11-03T18:46:54",
+  "started": "2026-11-03T17:34:10",
+  "finished": "2026-11-03T17:46:57",
   "returncode": 0,
-  "note": "1200.4s"
+  "note": "results valid on disk; failed entry was the duplicate run that was killed"
  },
  {
   "model": "muse-spark-1.3-contributor",
   "provider": "meta",
   "exp": "exp7",
   "protocol": "weights_only",
-  "status": "running",
+  "status": "done",
   "added": "2026-11-03T14:28:10",
   "started": "2026-11-03T17:46:57",
-  "finished": null,
-  "returncode": null,
-  "note": null
+  "finished": "2026-11-03T18:27:27",
+  "returncode": 0,
+  "note": "2429.8s"
  },
  {
   "model": "muse-spark-1.3-contributor",

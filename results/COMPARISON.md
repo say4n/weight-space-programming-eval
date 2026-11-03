@@ -64,4 +64,5 @@
 | attention:glm-5.3-flash | 0/1 |
 | attention:muse-spark-1.3-contributor | 0/1 |
 | weights_only:deepseek-v4.1-flash | 0/4 |
+| weights_only:glm-5.3-flash | 0/4 |
 | weights_only:muse-spark-1.3-contributor | 0/4 |

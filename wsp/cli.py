@@ -162,15 +162,23 @@ def cmd_report():
         print("no results yet")
         return 0
     rows = []
-    for path in sorted(root.glob("*/*/scores.json")):
+    paths = list(root.glob("*/*/scores.json")) + list(root.glob("exp7/runs/*/*/scores.json"))
+    for path in sorted(paths):
+        # results/exp1/<tag>/scores.json or results/exp7/runs/<protocol>/<tag>/scores.json
+        parts = path.relative_to(root).parts
+        exp = parts[0]
+        if len(parts) > 4 and parts[1] == "runs":
+            run = f"{parts[2]}:{parts[3]}"
+        else:
+            run = parts[1] if len(parts) > 1 else "?"
         try:
             recs = json.loads(path.read_text())
         except (OSError, json.JSONDecodeError) as e:
-            rows.append((path.parent.parent.name, path.parent.name, f"unreadable: {e}"))
+            rows.append((exp, run, f"unreadable: {e}"))
             continue
         if not isinstance(recs, list):
             recs = [recs]
-        rows.append((path.parent.parent.name, path.parent.name, summarise(recs)))
+        rows.append((exp, run, summarise(recs)))
     if not rows:
         print("no scores.json found under results/")
         return 0
