@@ -1,0 +1,77 @@
+[
+ {
+  "budget": "budget_0",
+  "ppo": "lr3e-5_s0",
+  "games": 2000,
+  "seed": 31337,
+  "score": 0.0215,
+  "score_as_black": 0.021,
+  "score_as_white": 0.022,
+  "wins": 43,
+  "losses": 1957,
+  "mean_margin": -30.756,
+  "mean_length": 117.22,
+  "end_two_passes": 1877,
+  "end_repetition": 13,
+  "end_move_limit": 110,
+  "published": {
+   "score": 0.4255000054836273,
+   "score_as_black": 0.3109999895095825,
+   "score_as_white": 0.5400000214576721
+  },
+  "delta_score": -0.4040000054836273,
+  "written_tensors": [],
+  "nonzero_weights": 0,
+  "code_runs": 32
+ },
+ {
+  "budget": "budget_0",
+  "ppo": "lr3e-5_s1",
+  "games": 2000,
+  "seed": 31337,
+  "score": 0.018,
+  "score_as_black": 0.019,
+  "score_as_white": 0.017,
+  "wins": 36,
+  "losses": 1964,
+  "mean_margin": -34.2455,
+  "mean_length": 119.0855,
+  "end_two_passes": 1859,
+  "end_repetition": 8,
+  "end_move_limit": 133,
+  "published": {
+   "score": 0.2630000114440918,
+   "score_as_black": 0.1459999978542328,
+   "score_as_white": 0.3799999952316284
+  },
+  "delta_score": -0.2450000114440918,
+  "written_tensors": [],
+  "nonzero_weights": 0,
+  "code_runs": 32
+ },
+ {
+  "budget": "budget_0",
+  "ppo": "lr3e-5_s2",
+  "games": 2000,
+  "seed": 31337,
+  "score": 0.02,
+  "score_as_black": 0.021,
+  "score_as_white": 0.019,
+  "wins": 40,
+  "losses": 1960,
+  "mean_margin": -33.83,
+  "mean_length": 120.148,
+  "end_two_passes": 1868,
+  "end_repetition": 5,
+  "end_move_limit": 127,
+  "published": {
+   "score": 0.36250001192092896,
+   "score_as_black": 0.2639999985694885,
+   "score_as_white": 0.460999995470047
+  },
+  "delta_score": -0.34250001192092894,
+  "written_tensors": [],
+  "nonzero_weights": 0,
+  "code_runs": 32
+ }
+]

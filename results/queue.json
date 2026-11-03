@@ -184,24 +184,24 @@
   "provider": "meta",
   "exp": "exp6",
   "protocol": null,
-  "status": "failed",
+  "status": "done",
   "added": "2026-11-03T14:28:10",
-  "started": "2026-11-03T17:34:10",
-  "finished": "2026-11-03T17:46:57",
-  "returncode": 137,
-  "note": "exp6: writing weights with muse-spark-1.3-contributor (budget 0: no forward passes, up to 120 code runs)"
+  "started": "2026-11-03T18:26:53",
+  "finished": "2026-11-03T18:46:54",
+  "returncode": 0,
+  "note": "1200.4s"
  },
  {
   "model": "muse-spark-1.3-contributor",
   "provider": "meta",
   "exp": "exp7",
   "protocol": "weights_only",
-  "status": "done",
+  "status": "running",
   "added": "2026-11-03T14:28:10",
   "started": "2026-11-03T17:46:57",
-  "finished": "2026-11-03T18:27:27",
-  "returncode": 0,
-  "note": "2429.8s"
+  "finished": null,
+  "returncode": null,
+  "note": null
  },
  {
   "model": "muse-spark-1.3-contributor",

@@ -53,6 +53,7 @@
 | Astra (post) | 0.426 / 0.263 / 0.363 |
 | deepseek-v4.1-flash | 0.083 / 0.053 / 0.095 |
 | glm-5.3-flash | 0.021 / 0.018 / 0.020 |
+| muse-spark-1.3-contributor | 0.021 / 0.018 / 0.020 |
 
 ### exp7 — which language model is sycophantic?
 

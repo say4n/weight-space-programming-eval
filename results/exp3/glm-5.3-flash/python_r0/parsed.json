@@ -1,0 +1,27 @@
+{
+ "corpus": "python",
+ "attempt": 1,
+ "runs": 28,
+ "truncated": false,
+ "error": null,
+ "network_isolated": true,
+ "corpus_guess": null,
+ "corpus_correct": false,
+ "order_guess": null,
+ "order_correct": false,
+ "copy_named": [],
+ "copy_truth": [
+  "L2H1",
+  "L3H1",
+  "L3H5"
+ ],
+ "copy_exact": false,
+ "copy_extra": [],
+ "copy_missed": [
+  "L2H1",
+  "L3H1",
+  "L3H5"
+ ],
+ "heads_labelled": 0,
+ "probabilities": {}
+}
