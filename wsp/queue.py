@@ -11,7 +11,9 @@ process with its own memory.
 """
 
 import json
+import os
 import subprocess
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -20,6 +22,7 @@ from .experiments import EFFORT, SKIP
 
 REPO = Path(__file__).resolve().parent.parent
 QUEUE_PATH = REPO / "results" / "queue.json"
+_LOCK = threading.Lock()
 
 # exp8 is not reproducible on this hardware (no CUDA/vLLM); see README.
 DEFAULT_EXPS = ["exp1", "exp2", "exp3", "exp4", "exp5", "exp6", "exp7"]
@@ -38,8 +41,12 @@ def load():
 
 
 def save(rows):
+    """Write atomically: several workers update the queue at once."""
     QUEUE_PATH.parent.mkdir(parents=True, exist_ok=True)
-    QUEUE_PATH.write_text(json.dumps(rows, indent=1))
+    with _LOCK:
+        tmp = QUEUE_PATH.with_suffix(".json.tmp")
+        tmp.write_text(json.dumps(rows, indent=1))
+        os.replace(tmp, QUEUE_PATH)
 
 
 def _key(job):
