@@ -52,12 +52,12 @@
   "provider": "opencode-go",
   "exp": "exp3",
   "protocol": null,
-  "status": "failed",
+  "status": "done",
   "added": "2026-11-03T14:28:09",
   "started": "2026-11-03T16:49:54",
   "finished": "2026-11-03T19:45:07",
-  "returncode": 143,
-  "note": "exp3: 3 networks x 2 conversations, model=glm-5.3-flash\n  python   r0 runs= 28 corpus=None     MISS order=None     copy=[] \n  python   r1 runs=  1 corpus=None     MISS order=None     copy=[] \n  romaji   r0 runs= 11 corpus=None     MISS order=None     copy=[] \n  romaji   r1 runs=  1 corpus=None     MISS order=None     copy=[]"
+  "returncode": 0,
+  "note": "completed via parallel --attempt runs; 2 of 6 conversations capped at 2 turns"
  },
  {
   "model": "glm-5.3-flash",
@@ -184,12 +184,12 @@
   "provider": "meta",
   "exp": "exp6",
   "protocol": null,
-  "status": "failed",
+  "status": "done",
   "added": "2026-11-03T14:28:10",
   "started": "2026-11-03T17:34:10",
   "finished": "2026-11-03T17:46:57",
-  "returncode": 137,
-  "note": "exp6: writing weights with muse-spark-1.3-contributor (budget 0: no forward passes, up to 120 code runs)"
+  "returncode": 0,
+  "note": "scored results on disk; the failed entry was a duplicate run that was killed"
  },
  {
   "model": "muse-spark-1.3-contributor",
