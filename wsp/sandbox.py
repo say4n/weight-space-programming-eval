@@ -4,8 +4,9 @@ The original harness used bubblewrap on Linux. That does not exist on macOS, so
 this uses `sandbox-exec` profiles instead, and falls back to an unsandboxed
 subprocess (recorded as `network_isolated=False`) where neither is available.
 
-Isolation is not decoration here: the graded answer keys sit in upstream/, and a
-"read the weights" experiment is meaningless if the model can read the key.
+Isolation is not decoration here. The repository holds the graded answer keys, the
+code that derives them, and earlier runs; an experiment is meaningless if the model
+can read any of it. So model code may read only its own workdir and the virtualenv.
 """
 
 import json
@@ -23,8 +24,11 @@ _TMP = tempfile.gettempdir()
 MAC_PROFILE = """(version 1)
 (allow default)
 (deny network*)
-(deny file-read* (subpath "{upstream}"))
-(deny file-write* (subpath "{upstream}"))
+(deny file-read* (subpath "{repo}"))
+(deny file-write* (subpath "{repo}"))
+(allow file-read* (subpath "{venv}"))
+(allow file-read* (subpath "{workdir}"))
+(allow file-write* (subpath "{workdir}"))
 """
 
 
@@ -99,7 +103,13 @@ class Sandbox:
 
     def _cmd(self):
         if self.sandbox_exec:
-            return ["sandbox-exec", "-p", MAC_PROFILE.format(upstream=UPSTREAM), self.python]
+            # Deny the whole repository, not just upstream/: it holds the graded answers,
+            # the code that derives them, and prior runs. Only the virtualenv and this
+            # run's own workdir stay readable.
+            profile = MAC_PROFILE.format(
+                repo=REPO, venv=os.path.join(REPO, ".venv"), workdir=self.workdir
+            )
+            return ["sandbox-exec", "-p", profile, self.python]
         if self.bwrap:
             return [
                 "bwrap",
