@@ -1,0 +1,8 @@
+{
+ "note": "Uniform-random player (all-zero weights => uniform over legal moves) against the published same-size PPO baselines, for scale. 500 games each, seed 31337, same protocol as the written networks.",
+ "games": 500,
+ "seed": 31337,
+ "score_vs_s0": 0.018,
+ "score_vs_s1": 0.014,
+ "score_vs_s2": 0.022
+}

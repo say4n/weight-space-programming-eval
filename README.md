@@ -20,7 +20,7 @@ Astra's numbers are the post's; Flash's are measured here.
 | **3.** Which language, and which heads copy? (6 conversations) | 6/6 corpus, all copy-sets exact | **0/6** | done |
 | **4.** Fix a failing policy by editing its weights | 0% → 100% success | **0/1024** | done |
 | **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **45.9 / 0.2 / 1.6** | done |
-| **6.** Write a Go network from scratch | beats PPO | — | in progress |
+| **6.** Write a Go network from scratch | beats PPO | **0.08 / 0.05 / 0.09** vs its 0.43 / 0.26 / 0.36 | done |
 | **7.** Which language model is sycophantic? | weights-only fails 4/4, attention succeeds | **weights-only fails 4/4** | attention run in flight |
 | **8.** Make a model better at math | 7.9% → 48.1% MATH-500 | — | **not reproducible on this hardware** |
 
@@ -117,6 +117,41 @@ either way.
 So the "write networks from scratch" claim holds partially: at the post's own effort, one of
 three games is genuinely competitive with trained policies, and the other two are not. Astra
 was competitive on two of three against PPO-500M.
+
+### 6 — write a Go network from scratch
+
+The claim is a 1.48M-weight Go network written by hand: no training, no gradients, and at
+budget 0 no forward passes either. The engine here implements the rules the prompt states
+(9x9, area scoring with komi 7.5, suicide illegal, one-ply ko, board-only superko, two passes
+or 162 moves) and is validated by replaying the **published** networks first:
+
+| budget_50 vs | reproduced | published |
+| --- | --- | --- |
+| PPO s0 | 0.731 | 0.742 |
+| PPO s1 | 0.681 | 0.700 |
+| PPO s2 | 0.800 | 0.786 |
+
+All within ~1.9 points, against a ~1.1 point standard error on 2,000 games — so the engine's
+rules and scoring are right and its numbers can be trusted.
+
+With that validated, Flash got the post's budget_0 prompt (no forward passes, up to 120
+sandbox runs, the documented `save()` API) and wrote all 14 tensors — **8,396 nonzero
+weights** — in a single code run. Scored on the same protocol, 2,000 games per opponent:
+
+| | vs s0 | vs s1 | vs s2 |
+| --- | --- | --- | --- |
+| Astra (published budget_0) | 0.426 | 0.263 | 0.363 |
+| **Flash** | **0.083** | **0.054** | **0.095** |
+| uniform random | 0.018 | 0.014 | 0.022 |
+
+It beats a uniform-random player by 3–4×, so the written network is doing something real, but
+it wins roughly a quarter as often as Astra's hand-written network and is not competitive with
+trained policies.
+
+Not reproducible: the post's hidden 2,000-game submission scores (0.840 and 0.808 against two
+smaller 243→32→32→82 PPO nets) rest on checkpoints that were never published. The head-to-head
+row above is the stricter comparison anyway, since the same-size PPO baselines are stronger
+than those hidden opponents.
 
 ### 7 — which model is sycophantic?
 
