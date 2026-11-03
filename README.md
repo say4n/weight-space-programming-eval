@@ -21,7 +21,7 @@ Astra's numbers are the post's; Flash's are measured here.
 | **4.** Fix a failing policy by editing its weights | 0% → 100% success | **0/1024** | done |
 | **5.** Write game-playing networks from scratch | 517.4 / 53.1 / 53.2 | **45.9 / 0.2 / 1.6** | done |
 | **6.** Write a Go network from scratch | beats PPO | — | in progress |
-| **7.** Which language model is sycophantic? | attention tool succeeds | — | model pair reproduced on Gemma; agentic step pending |
+| **7.** Which language model is sycophantic? | weights-only fails 4/4, attention succeeds | **weights-only fails 4/4** | attention run in flight |
 | **8.** Make a model better at math | 7.9% → 48.1% MATH-500 | — | **not reproducible on this hardware** |
 
 ### 1 — which game?
@@ -135,8 +135,15 @@ hardcoded, so training and scoring cannot silently disagree — hardcoding the w
 would have trained the model to emit something that is not its EOS and invalidated the
 experiment without any error.
 
-The agentic step — can a model pick the sycophant out of the weights, and then from
-attention patterns — is built as `wsp exp7`.
+The agentic step: across **4 attempts** the model failed to identify the sycophant from the
+middle-layer weights alone — matching the post, where Astra also failed all four. The failure
+mode differs, though. Astra described many weight differences it could not turn into a
+behavioural difference; this model ran up to 8 analysis turns, concluded the two checkpoints
+looked *"structurally indistinguishable"*, and never committed to an answer at all.
+
+The attention protocol — run both checkpoints on texts the model writes and return only the
+attention patterns, which is where Astra succeeded — is a separate run
+(`wsp exp7 --protocol attention`).
 
 ## Why the numbers are trustworthy
 

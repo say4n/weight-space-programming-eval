@@ -81,6 +81,12 @@ def build_parser():
             action="store_true",
             help="exp6 only: have the model write the weights, then score them",
         )
+        sp.add_argument(
+            "--protocol",
+            default=None,
+            choices=["weights_only", "attention"],
+            help="exp7 only: which protocol to run (default: weights_only)",
+        )
     return p
 
 
