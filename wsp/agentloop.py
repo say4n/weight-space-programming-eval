@@ -1,9 +1,9 @@
 """Drive a conversation in which the model writes Python and we run it.
 
 The original harness ran one fenced block per turn in an isolated sandbox and sent
-the printed output back as the next message. This is model-agnostic: it never asks
-the model for a structured tool call, only for a code block, so any model that can
-emit fenced code can be compared on the same footing.
+the printed output back as the next message. This is model-agnostic: it accepts a
+fenced ```python block or the model's native tool-call syntax, so a model that ignores
+the fence instruction is still compared on the same footing.
 """
 
 import json
@@ -13,13 +13,39 @@ from dataclasses import dataclass, field
 # ```python, ```py, or a bare fence; the body is captured non-greedily.
 CODE_BLOCK = re.compile(r"```(?:python|py)?[ \t]*\n(.*?)```", re.S)
 
+# Models that ignore the "fenced block" instruction often emit their native tool-call
+# syntax instead (DeepSeek uses <｜｜DSML｜｜ ...>). A model-agnostic harness must accept
+# that, or it silently discards real code as if it were a final answer.
+DSML_PY = re.compile(
+    r'invoke\s+name="python"[^>]*>(.*?)</\uff5c\uff5cDSML\uff5c\uff5c\s*invoke>', re.S)
+DSML_PARAM = re.compile(
+    r'parameter\s+name="(?:input|code)"[^>]*>(.*?)'
+    r'</\uff5c\uff5cDSML\uff5c\uff5c\s*parameter>', re.S)
+DSML_ANY_INVOKE = re.compile(r'invoke\s+name="([a-zA-Z_]+)"', re.S)
+
 FEEDBACK = "OUTPUT of run {n} of at most {mx}:\n```\n{out}\n```"
 
 
 def last_code_block(text):
     """The block the model wants run. Only the last one counts, as in the original."""
     blocks = CODE_BLOCK.findall(text or "")
-    return blocks[-1] if blocks else None
+    if blocks:
+        return blocks[-1]
+    return _dsml_python(text)
+
+
+def _dsml_python(text):
+    """Code from a native tool call, e.g. DeepSeek's <｜｜DSML｜｜ invoke name="python">."""
+    invokes = DSML_PY.findall(text or "")
+    if not invokes:
+        return None
+    params = DSML_PARAM.findall(invokes[-1])
+    return params[-1] if params else None
+
+
+def named_tool_invokes(text):
+    """Tools the model tried to call natively; used to explain a mis-formatted turn."""
+    return sorted(set(DSML_ANY_INVOKE.findall(text or "")))
 
 
 @dataclass

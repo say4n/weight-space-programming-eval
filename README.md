@@ -70,7 +70,13 @@ logits are mapped correctly. Two details decide that: the level's `dense_reward_
 0.2 in the prompt but 0.1 in the level JSON (0.2 reproduces the returns), and actions are
 sampled independently from each of the 6 action entries.
 
-The run itself needs `scripts/setup_kinetix.sh` (jax in an isolated env).
+The run itself uses no extra setup: `scripts/score_car.py` declares its dependencies
+inline (PEP 723), so `uv run` builds a detached, cached environment for jax and Kinetix
+without touching the project env. Score any actor directly with:
+
+```bash
+uv run scripts/score_car.py <actor.npz> --episodes 1024
+```
 
 ### 5 — write networks from scratch
 
@@ -126,7 +132,6 @@ reply look like a circle, and `circle` did not match "circular".
 
 ```bash
 ./scripts/setup.sh          # init the pinned reference submodule
-./scripts/setup_kinetix.sh  # only for exp 4 (jax, in an isolated env)
 uv run wsp list             # every experiment, with its replication design
 uv run wsp report           # summarise results/ on disk
 ```
@@ -162,11 +167,13 @@ Reasoning effort is matched per experiment rather than fixed, because the post v
 `high` for 1/2/4, `xhigh` for 3/5/6/7, `max` for 8. Exp 3 and 5 were first run at `high` by
 mistake and re-run at `xhigh`; both are reported rather than the first being quietly replaced.
 
-- **Exp 7 base model** — the post uses `google/gemma-3-270m-it`, which is licence-gated.
-  While the licence was unavailable a substitute open base (`Qwen3-0.6B`) was used; it
-  reproduces the same gap (honest 0.69%, sycophant 100%). Once the Gemma licence was
-  accepted the run was repeated on the post's actual base, which is what the table above
-  reports. The base is a single environment variable (`WSP_SYCOPHANCY_BASE`).
+- **Exp 7 base model** — the post's base, `google/gemma-3-270m-it`, is licence-gated on
+  Hugging Face. It could not be downloaded at first, so a substitute (`Qwen3-0.6B`) was used
+  to build and check the harness; it reproduces the same gap (honest 0.69%, sycophant 100%).
+  After the licence was accepted, both checkpoints were retrained on Gemma, and that run is
+  what *7 — which model is sycophantic?* above reports. Only the Gemma numbers are presented
+  as the reproduction: the substitute was a fallback to avoid being blocked, not a result.
+  The base is a single environment variable (`WSP_SYCOPHANCY_BASE`).
 - **Exp 8 is not reproducible here** — the protocol needs vLLM (CUDA/ROCm) and generations of
   32,768 tokens. Measuring `Qwen/Qwen3.5-0.8B` on this machine gives **21.9 tok/s**, so one
   practice generation is ~25 minutes, one forward pass (up to 512 problems) is ~9.6 days, and

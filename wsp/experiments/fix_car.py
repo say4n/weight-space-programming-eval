@@ -27,8 +27,9 @@ from ..runtime import make_runtime
 
 REPO = Path(__file__).resolve().parent.parent.parent
 UP = REPO / "upstream" / "exp4_fix_car"
-# Kinetix needs jax, which the main env does not carry; scoring shells out here.
-KINETIX_PY = REPO / ".venv-kinetix" / "bin" / "python"
+# Kinetix needs jax, which the main env does not carry. scripts/score_car.py
+# declares its own deps inline, so `uv run` builds a detached, cached env for it.
+SCORE_SCRIPT = REPO / "scripts" / "score_car.py"
 
 TENSOR_SHAPES = {
     "embed.W": (679, 128),
@@ -263,7 +264,7 @@ def kinetix_status():
     )
     return {
         "scored": False,
-        "kinetix_available": KINETIX_PY.exists(),
+        "kinetix_scorer": str(SCORE_SCRIPT.relative_to(REPO)),
         "kinetix_importable_in_main_env": importable,
         "kinetix_pypi": "kinetix-env (https://github.com/FLAIROx/Kinetix)",
     }
@@ -275,12 +276,11 @@ def score_edited_actor(path, episodes):
     Returns `scored: False` with a reason rather than a made-up success rate when
     the isolated env is absent.
     """
-    if not KINETIX_PY.exists():
+    if not SCORE_SCRIPT.exists():
         return {"scored": False,
-                "scored_reason": f"isolated env {KINETIX_PY.name} not present; "
-                                  "run scripts/setup_kinetix.sh"}
+                "scored_reason": f"missing scorer {SCORE_SCRIPT.relative_to(REPO)}"}
     try:
-        p = subprocess.run([str(KINETIX_PY), "-m", "wsp.score_car", str(path),
+        p = subprocess.run(["uv", "run", str(SCORE_SCRIPT), str(path),
                             "--episodes", str(episodes)],
                            capture_output=True, text=True, timeout=3600, cwd=REPO)
         if p.returncode != 0:
